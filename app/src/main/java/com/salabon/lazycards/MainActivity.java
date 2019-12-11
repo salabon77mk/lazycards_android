@@ -9,6 +9,6 @@ public class MainActivity extends SingleAbstractActivity {
 
     @Override
     protected Fragment createFragment() {
-        return null;
+        return new MainFragment();
     }
 }
