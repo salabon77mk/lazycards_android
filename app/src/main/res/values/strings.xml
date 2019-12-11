@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">LazyCards</string>
+
+    <string name="card_vocab_hint">Enter your vocab word</string>
+    <string name="submit_button">Submit</string>
+
+    <string name="TMP_network_scan">Net_Scan</string>
+</resources>
