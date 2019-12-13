@@ -1,5 +1,6 @@
 package com.salabon.lazycards;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,6 +13,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+
+import NetworkScanner.NetworkScannerActivity;
 
 public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
@@ -46,8 +49,16 @@ public class MainFragment extends Fragment {
 
 
         // TODO Delete once network scanner is fully implemented
+        // TODO send intent to create a netscanner activity
         // Should be replaced with a dialog
         mTMPNetScanButton = v.findViewById(R.id.TMP_network_scan_button);
+        mTMPNetScanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = NetworkScannerActivity.newIntent(getActivity());
+                startActivity(intent);
+            }
+        });
 
         return v;
     }
@@ -63,6 +74,7 @@ public class MainFragment extends Fragment {
         Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
     }
 
+    // If the IP is not set, create a dialog asking user if they'd like to perform a netscan
     private boolean isIpSet(){
         return DefaultPreferences.getIp(getActivity()) != null;
     }

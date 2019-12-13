@@ -7,4 +7,11 @@
     <string name="TMP_network_scan">Net_Scan</string>
 
     <string name="no_word_toast">Please enter a word for submission</string>
+
+    <string name="host_not_set_text">No host has been selected </string>
+    <string name="change_host_text">Change host</string>
+    <string name="rescan_text">Rescan</string>
+
+    <string name="host_label">Host</string>
+
 </resources>
