@@ -10,12 +10,13 @@
 
         <TextView
             android:id="@+id/network_scanner_host_text_view"
-            android:layout_width="250dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/host_not_set_text"
-            android:gravity="center"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="8dp"/>
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/host_not_set_text" />
 
         <Button
             android:id="@+id/change_host_button"

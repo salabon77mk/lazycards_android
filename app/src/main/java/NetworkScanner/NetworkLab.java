@@ -19,11 +19,13 @@ public class NetworkLab {
 
         //TODO Delete this when network scanner is done
         // Prepopulates with some random hosts
+        /*
         String ipBase = "255.255.0.";
         for(int i = 0; i < 50; i++){
             Host host = new Host( ipBase + i);
             mHostList.add(host);
         }
+         */
     }
 
     public void addHost(Host host){

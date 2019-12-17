@@ -2,7 +2,11 @@ package NetworkScanner;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
+
 import android.os.Bundle;
+
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,28 +24,57 @@ import com.salabon.lazycards.R;
 
 import java.util.List;
 
+// TODO
+// Fix landscape orientation
+
 public class NetworkScannerActivity extends AppCompatActivity {
-    //TODO add recyclerview and make it update the UI
-    private TextView mCurrentHost;
+    private static final String TAG = "NetworkScannerActivity";
+    private static final String HOST_IP = "host_ip";
+
+    private TextView mTargetServer;
     private Button mChangeHostButton;
     private RecyclerView mHostRecyclerView;
+
     private NetworkAdapter mAdapter;
+
+    private String mCurrentHostIp;
+
+    private NetworkManager mNetworkManager;
+
 
     public static Intent newIntent(Context context){
         return new Intent(context, NetworkScannerActivity.class);
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_network_scanner);
 
-        setCurrentHost();
+        if(savedInstanceState != null){
+            mCurrentHostIp = savedInstanceState.getString(HOST_IP);
+        }
+        else{
+            setCurrentHost();
+        }
+
+        setTargetServer();
         createChangeHostButton();
         mHostRecyclerView = findViewById(R.id.network_recycler_view);
         mHostRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        Handler responseHandler = new Handler();
+
+        mNetworkManager = new NetworkManager(responseHandler);
+        mNetworkManager.newPingerTasks(mCurrentHostIp);
+        mNetworkManager.setNetworkTaskListener(
+                new NetworkManager.NetworkTaskListener() {
+                    @Override
+                    public void onTaskComplete() {
+                        updateUI();
+                    }
+                }
+        );
         updateUI();
     }
 
@@ -54,19 +87,28 @@ public class NetworkScannerActivity extends AppCompatActivity {
         }
         else{
             mAdapter.setHosts(hosts);
+            mAdapter.notifyDataSetChanged();
         }
 
     }
 
-    // Change the current host that will receive the flashcards
     private void setCurrentHost(){
-        mCurrentHost = findViewById(R.id.network_scanner_host_text_view);
+        WifiManager wm = (WifiManager) this.getApplicationContext().getSystemService(WIFI_SERVICE);
+        int ip = wm.getConnectionInfo().getIpAddress();
+
+        mCurrentHostIp = String.format("%d.%d.%d.%d", (ip & 0xff), (ip >> 8 & 0xff), (ip >> 16 & 0xff),
+                (ip >> 24 & 0xff));
+    }
+
+    // Change the current host that will receive the flashcards
+    private void setTargetServer(){
+        mTargetServer = findViewById(R.id.network_scanner_host_text_view);
         String ip = DefaultPreferences.getIp(this);
         if(ip == null){
-            mCurrentHost.setText(R.string.host_not_set_text);
+            mTargetServer.setText(R.string.host_not_set_text);
         }
         else{
-            mCurrentHost.setText(ip);
+            mTargetServer.setText(ip);
         }
     }
 
@@ -78,6 +120,18 @@ public class NetworkScannerActivity extends AppCompatActivity {
                 // TODO make a dialog that asks the user for an IP
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString(HOST_IP, mCurrentHostIp);
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        mNetworkManager.cancelAll();
     }
 
     private class NetworkHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -109,11 +163,8 @@ public class NetworkScannerActivity extends AppCompatActivity {
         public void onClick(View v) {
 
         }
-
-
     }
 
-    //TODO
     private class NetworkAdapter extends RecyclerView.Adapter<NetworkHolder>{
         List<Host> mHosts;
 
@@ -143,4 +194,6 @@ public class NetworkScannerActivity extends AppCompatActivity {
             mHosts = hosts;
         }
     }
+
+
 }
