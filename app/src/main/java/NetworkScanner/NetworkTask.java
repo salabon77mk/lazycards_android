@@ -1,10 +1,16 @@
+/* FLOW OF THE CODE (refer to NetworkManager for the big picture
+    1. Create runnables
+    2. When the state of a runnable changes, the NetworkManager is notified of the change
+ */
+
 package NetworkScanner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkTask implements PingerRunnable.PingerRunnableMethods {
     // The hosts that exist
-    private List<String> mReachableHosts;
+    private List<String> mReachableHosts = new ArrayList<>();
 
     // The thread that is doing work for this task
     Thread mThreadThis;
@@ -30,6 +36,8 @@ public class NetworkTask implements PingerRunnable.PingerRunnableMethods {
         sNetworkManager.handleState(this, state);
     }
 
+    // Has to be a synchronized operation since the Thread object can be modified by
+    // processes outside of the app
     public void setCurrentThread(Thread thread){
         synchronized (sNetworkManager){
             mCurrentThread = thread;
@@ -42,7 +50,7 @@ public class NetworkTask implements PingerRunnable.PingerRunnableMethods {
         }
     }
 
-    protected PingerRunnable getPingerRunnable(){
+    PingerRunnable getPingerRunnable(){
         return mPingerRunnable;
     }
 
@@ -72,12 +80,13 @@ public class NetworkTask implements PingerRunnable.PingerRunnableMethods {
             case PingerRunnable.PING_STATE_COMPLETE:
                 outState = NetworkManager.PING_COMPLETE;
                 break;
+            case PingerRunnable.PING_STATE_FAILED:
+                outState = NetworkManager.PING_FAILED;
+                break;
             default:
                 outState = NetworkManager.PING_STARTED;
         }
 
         handleState(outState);
     }
-
-
 }

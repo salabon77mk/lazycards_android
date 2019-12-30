@@ -1,23 +1,38 @@
+/* Overall flow of the code
+   TYPICAL SCENARIO
+   1. Instantiate network scanner somewhere else, instantiation creates a thread pool
+   2. Start a new scan (startScan)
+   3. startScan creates NetworkTasks which ping hosts on the network
+   4. These NetworkTasks launch a runnable
+   5. When that runnable is done, it changes its state, notifying the handlers here
+   6. Once a scan is complete, enter ResponseHandlerUpdate
+
+   CANCEL SCENARIO
+   1. If user hits refresh to start a new scan, we must first cancel all the threads, done in cancelAll
+ */
+
 package NetworkScanner;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+class NetworkManager {
 
-// I think this entire class can be reworked away from singleton
-// TODO implement an interface listener that will allow handler to update main thread
-public class NetworkManager {
+    // Have to use AtomicIntegers to update the RecyclerView, using prim ints will make the UI not update properly
+    private AtomicInteger oldPos = new AtomicInteger(0);
+    private AtomicInteger newPos = new AtomicInteger(0);
 
+    static final int PING_FAILED = -1;
     static final int PING_STARTED = 1;
     static final int PING_COMPLETE = 2;
 
@@ -28,13 +43,15 @@ public class NetworkManager {
     private static final int MAX_PINGS = 256;
 
     // These two fields must when multiplied be equal to MAX_PINGS
-    private static final int MAX_TASKS = 64;
-    protected static final int PINGS_PER_TASK = 4;  // used in PingerRunnable
+    static final int MAX_TASKS = 128;
+    static final int PINGS_PER_TASK = 2;  // used in PingerRunnable
 
-    private static final int CORE_POOL_SIZE = 64;
-    private static final int MAX_POOL_SIZE = 64;
+    private static final int CORE_POOL_SIZE = 128;
+    private static final int MAX_POOL_SIZE = 128;
 
     private final BlockingQueue<Runnable> mPingerQueue;
+
+    private final HashSet<NetworkTask> mTaskHashSet;
 
     private final ThreadPoolExecutor mPingerPool;
 
@@ -50,19 +67,18 @@ public class NetworkManager {
     NetworkTaskListener mNetworkTaskListener;
 
     protected interface NetworkTaskListener{
-        void onTaskComplete();
+        void onTaskComplete(int oldPos, int newPos);
     }
 
-    protected void setNetworkTaskListener(NetworkTaskListener listener){
+    void setNetworkTaskListener(NetworkTaskListener listener){
         mNetworkTaskListener = listener;
     }
 
-    // TODO This is where we'll start up our thread pools
-    // construct needs a handler from main thread
-    protected NetworkManager(Handler responseHandler){
+    NetworkManager(Handler responseHandler){
         assert MAX_PINGS == MAX_TASKS * PINGS_PER_TASK : "MAX_TASKS: " + MAX_TASKS + " and PINGS_PER_TASK: " +
                 PINGS_PER_TASK + "when multiplied do not equal MAX_PINGS: " + MAX_PINGS;
 
+        mTaskHashSet = new HashSet<>();
         mResponseHandler = responseHandler;
 
         mPingerQueue = new LinkedBlockingQueue<>();
@@ -81,6 +97,9 @@ public class NetworkManager {
                         break;
                     case PING_STARTED:
                         break; // nothing to do
+                    case PING_FAILED:
+                        mTaskHashSet.remove(networkTask);
+                        break;
                     default:
                         super.handleMessage(inputMessage);
                 }
@@ -88,17 +107,19 @@ public class NetworkManager {
         };
     }
 
-    protected void handleState(NetworkTask task,  int state){
+    void handleState(NetworkTask task,  int state){
         // just pass the message along
         mRequestHandler.obtainMessage(state, task).sendToTarget();
     }
 
-    protected void newPingerTasks(String host){
+    void startScan(String host){
+        mResponseHandler.obtainMessage(NetworkScannerActivity.PING_STARTED).sendToTarget();
         String domain = getDomain(host);
         NetworkTask.setNetworkManager(this);
         int interval = Integer.numberOfTrailingZeros(PINGS_PER_TASK);
         for(int i = 0; i < MAX_TASKS; i++){
             NetworkTask networkTask = new NetworkTask(domain, i << interval);
+            mTaskHashSet.add(networkTask);
             this.mPingerPool.execute(networkTask.getPingerRunnable());
         }
     }
@@ -113,7 +134,11 @@ public class NetworkManager {
         mResponseHandler.post(new Runnable(){
             @Override
             public void run(){
+                mResponseHandler.obtainMessage(NetworkScannerActivity.PING_COMPLETE).sendToTarget();
                 List<String> reachableHosts = networkTask.getHosts();
+                // no longer need the task
+                mTaskHashSet.remove(networkTask);
+
                 if(reachableHosts.isEmpty()){
                     return;
                 }
@@ -127,20 +152,20 @@ public class NetworkManager {
                 synchronized (netLab.getHosts()){
                     for(Host host: hosts){
                         netLab.addHost(host);
+                        newPos.getAndAdd(1);
                     }
                 }
-                mNetworkTaskListener.onTaskComplete();
+                mNetworkTaskListener.onTaskComplete(oldPos.get(),newPos.get());
+                oldPos.getAndSet(newPos.get());
             }
         });
     }
 
-    public void cancelAll(){
-        NetworkTask[] tasks = new NetworkTask[this.mPingerQueue.size()];
-        this.mPingerQueue.toArray(tasks);
-
+    void cancelAll(){
+        // This boolean ensures we don't queue up multiple cancel requests which may crash the app
         synchronized (this){
-            for(int i = 0; i < tasks.length; i++){
-                Thread thread = tasks[i].mThreadThis;
+            for(NetworkTask task : mTaskHashSet){
+                Thread thread = task.mThreadThis;
 
                 if(thread != null){
                     thread.interrupt();
@@ -149,3 +174,4 @@ public class NetworkManager {
         }
     }
 }
+

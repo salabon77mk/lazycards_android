@@ -3,32 +3,35 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/network_scanner_host_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:gravity="center"
+        android:hint="@string/change_host_text" />
 
-        <TextView
-            android:id="@+id/network_scanner_host_text_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="8dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/host_not_set_text" />
 
-        <Button
-            android:id="@+id/change_host_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/change_host_text"/>
-    </LinearLayout>
+
+    <ProgressBar
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:id="@+id/network_scanner_progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:indeterminate="false"
+        android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/network_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+
 
 </LinearLayout>

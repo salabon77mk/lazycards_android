@@ -1,3 +1,9 @@
+/* FLOW OF CODE
+    1. A network scan starts up, the results of the scan are handled by a Handler
+    2. User can click on a Network to set that as their target server
+    3. User can refresh the scan if there are no scans currently running
+ */
+
 package NetworkScanner;
 
 import android.content.Context;
@@ -5,13 +11,20 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 
 import android.os.Bundle;
-
 import android.os.Handler;
+;
+import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,20 +37,21 @@ import com.salabon.lazycards.R;
 
 import java.util.List;
 
-// TODO
-// Fix landscape orientation
-
 public class NetworkScannerActivity extends AppCompatActivity {
+    static final int PING_COMPLETE = 1;
+    static final int PING_STARTED = 2;
+
     private static final String TAG = "NetworkScannerActivity";
     private static final String HOST_IP = "host_ip";
 
-    private TextView mTargetServer;
-    private Button mChangeHostButton;
+    private EditText mTargetServer;
     private RecyclerView mHostRecyclerView;
+    private ProgressBar mProgressBar;
 
     private NetworkAdapter mAdapter;
 
     private String mCurrentHostIp;
+    private boolean mRescanAvailable;
 
     private NetworkManager mNetworkManager;
 
@@ -59,19 +73,25 @@ public class NetworkScannerActivity extends AppCompatActivity {
         }
 
         setTargetServer();
-        createChangeHostButton();
         mHostRecyclerView = findViewById(R.id.network_recycler_view);
         mHostRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        Handler responseHandler = new Handler();
+        mProgressBar = findViewById(R.id.network_scanner_progressbar);
+        mProgressBar.setMax(NetworkManager.MAX_TASKS);
+        mProgressBar.setProgress(0);
+        mProgressBar.setVisibility(View.VISIBLE);
 
+        Handler responseHandler = setHandler();
         mNetworkManager = new NetworkManager(responseHandler);
-        mNetworkManager.newPingerTasks(mCurrentHostIp);
+        mNetworkManager.startScan(mCurrentHostIp);
         mNetworkManager.setNetworkTaskListener(
                 new NetworkManager.NetworkTaskListener() {
                     @Override
-                    public void onTaskComplete() {
-                        updateUI();
+                    public void onTaskComplete(int oldPos, int newPos) {
+                        //updateUI();
+                        for(int i = oldPos; i < newPos; i++){
+                            mAdapter.notifyItemInserted(i);
+                        }
                     }
                 }
         );
@@ -89,7 +109,6 @@ public class NetworkScannerActivity extends AppCompatActivity {
             mAdapter.setHosts(hosts);
             mAdapter.notifyDataSetChanged();
         }
-
     }
 
     private void setCurrentHost(){
@@ -104,22 +123,105 @@ public class NetworkScannerActivity extends AppCompatActivity {
     private void setTargetServer(){
         mTargetServer = findViewById(R.id.network_scanner_host_text_view);
         String ip = DefaultPreferences.getIp(this);
-        if(ip == null){
-            mTargetServer.setText(R.string.host_not_set_text);
-        }
-        else{
+        if(ip != null) {
             mTargetServer.setText(ip);
         }
-    }
 
-    private void createChangeHostButton(){
-        mChangeHostButton = findViewById(R.id.change_host_button);
-        mChangeHostButton.setOnClickListener(new View.OnClickListener() {
+        mTargetServer.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                // TODO make a dialog that asks the user for an IP
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                DefaultPreferences.setIp(NetworkScannerActivity.this, s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
+    }
+
+    private Handler setHandler(){
+        Handler responseHandler = new Handler(getMainLooper()){
+            @Override
+            public void handleMessage(Message msg){
+                if(mProgressBar == null){
+                    return;
+                }
+                switch (msg.what){
+                    case PING_COMPLETE:
+                        synchronized (mProgressBar) {
+                            mProgressBar.setMax(NetworkManager.MAX_TASKS);
+                            int progress = mProgressBar.getProgress();
+                            mProgressBar.setProgress(++progress);
+                            if (mProgressBar.getProgress() == mProgressBar.getMax()) {
+                                mProgressBar.setVisibility(View.GONE);
+
+                                mRescanAvailable = true;
+                                invalidateOptionsMenu();
+
+                                NetworkLab.get().sortHostsList();
+                                // Must update the adapter's list because it's holding ref to old one
+                                mAdapter.setHosts(NetworkLab.get().getHosts());
+                                mAdapter.notifyDataSetChanged();
+                            }
+
+                        }
+                        break;
+                    case PING_STARTED:
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        break;
+                    default:
+                        break;
+                        //do nothing
+                }
+            }
+        };
+        return responseHandler;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.activity_network_scanner, menu);
+
+        MenuItem rescanItem = menu.findItem(R.id.network_scanner_rescan);
+
+        if(mRescanAvailable){
+            rescanItem.setEnabled(true);
+            rescanItem.setVisible(true);
+        }
+        else{
+            rescanItem.setEnabled(false);
+            rescanItem.setVisible(false);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case R.id.network_scanner_rescan:
+                // Allow a rescan only if the previous scan has completed
+                if(mProgressBar.getProgress() == mProgressBar.getMax()) {
+                    // Get rid of the option to rescan since we started a new one
+                    mRescanAvailable = false;
+                    invalidateOptionsMenu();
+
+                    mNetworkManager.cancelAll();
+                    NetworkLab.get().emptyHostsList();
+                    mProgressBar.setProgress(0);
+                    mNetworkManager.startScan(mCurrentHostIp);
+
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -131,6 +233,7 @@ public class NetworkScannerActivity extends AppCompatActivity {
     @Override
     protected void onStop(){
         super.onStop();
+        NetworkLab.get().emptyHostsList();
         mNetworkManager.cancelAll();
     }
 
@@ -194,6 +297,4 @@ public class NetworkScannerActivity extends AppCompatActivity {
             mHosts = hosts;
         }
     }
-
-
 }

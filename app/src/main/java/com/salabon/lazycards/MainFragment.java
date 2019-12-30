@@ -49,7 +49,6 @@ public class MainFragment extends Fragment {
 
 
         // TODO Delete once network scanner is fully implemented
-        // TODO send intent to create a netscanner activity
         // Should be replaced with a dialog
         mTMPNetScanButton = v.findViewById(R.id.TMP_network_scan_button);
         mTMPNetScanButton.setOnClickListener(new View.OnClickListener() {

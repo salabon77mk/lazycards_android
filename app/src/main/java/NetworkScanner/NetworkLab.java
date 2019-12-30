@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkLab {
+    private static final int MAX_IP_VALUE = 256; // assuming IPv4
+
     private static NetworkLab sNetworkLab;
+
     private List<Host> mHostList;
 
     public static NetworkLab get(){
@@ -16,16 +19,6 @@ public class NetworkLab {
 
     private NetworkLab(){
         mHostList = new ArrayList<>();
-
-        //TODO Delete this when network scanner is done
-        // Prepopulates with some random hosts
-        /*
-        String ipBase = "255.255.0.";
-        for(int i = 0; i < 50; i++){
-            Host host = new Host( ipBase + i);
-            mHostList.add(host);
-        }
-         */
     }
 
     public void addHost(Host host){
@@ -34,5 +27,26 @@ public class NetworkLab {
 
     public List<Host> getHosts(){
         return mHostList;
+    }
+
+    public void emptyHostsList(){
+        mHostList.clear();
+    }
+
+    public void sortHostsList(){
+        int[] values = new int[MAX_IP_VALUE];
+        for(int i = 0; i < mHostList.size(); i++){
+            Host currHost = mHostList.get(i);
+            values[currHost.getLastIpByte()] = i + 1;
+        }
+
+        List<Host> sortedHosts = new ArrayList<>();
+        for(int i = 0; i < values.length; i++){
+            if(values[i] != 0){
+                Host currHost = mHostList.get(values[i] - 1);
+                sortedHosts.add(currHost);
+            }
+        }
+        mHostList = sortedHosts;
     }
 }

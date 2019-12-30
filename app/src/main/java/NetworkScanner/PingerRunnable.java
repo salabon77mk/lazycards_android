@@ -2,21 +2,16 @@ package NetworkScanner;
 
 
 import android.os.Process;
-import android.util.Log;
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.Callable;
 
 class PingerRunnable implements Runnable {
     private static final String TAG = "PingerCallable";
 
+    static final int PING_STATE_FAILED = -1;
     static final int PING_STATE_STARTED = 1;
     static final int PING_STATE_COMPLETE = 2;
 
@@ -64,27 +59,45 @@ class PingerRunnable implements Runnable {
 
         // We don't need this to have a high priority
         android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        for(int i = mStartAddressIdx; i < mEndAddressIdx; i++) {
-            String address = mDomain + i;
-            try {
-                if (InetAddress.getByName(address).isReachable(TIMEOUT)) {
-                    reachableHosts.add(address);
-                }
-            } catch (IOException e) {
-                // Do nothing as there's nothing to worry about here
-            }
-        }
-        mNetworkTask.setHosts(reachableHosts);
-        
-        mNetworkTask.setCurrentState(PING_STATE_COMPLETE);
-        // Release the thread
-        mNetworkTask.setDownloadThread(null);
 
+        try {
+            if(Thread.interrupted()){
+                throw new InterruptedException();
+            }
+
+            for (int i = mStartAddressIdx; i < mEndAddressIdx; i++) {
+                String address = mDomain + i;
+                try {
+                    if (InetAddress.getByName(address).isReachable(TIMEOUT)) {
+                        reachableHosts.add(address);
+                    }
+                } catch (IOException e) {
+                    // Do nothing as there's nothing to worry about here
+                }
+
+                if(Thread.interrupted()){
+                    throw new InterruptedException();
+                }
+            }
+
+            mNetworkTask.setHosts(reachableHosts);
+            mNetworkTask.setCurrentState(PING_STATE_COMPLETE);
+        }
+        catch (InterruptedException ie){
+            mNetworkTask.setCurrentState(PING_STATE_FAILED);
+        }
+        finally {
+            // Release the thread
+            mNetworkTask.setDownloadThread(null);
+            // reset flag
+            Thread.interrupted();
+        }
     }
+
 }
 
 
-// This could be a more effective way of pinging?
+// This could be a more effective way of pinging if we need to use sockets?
 /*
     public String call() throws Exception{
                 try(final Socket socket = new Socket()){
