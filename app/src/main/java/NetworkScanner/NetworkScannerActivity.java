@@ -29,6 +29,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,12 +39,14 @@ import com.salabon.lazycards.R;
 
 import java.util.List;
 
-public class NetworkScannerActivity extends AppCompatActivity {
+public class NetworkScannerActivity extends AppCompatActivity
+implements HostSelectDialog.HostSelectDialogListener {
     static final int PING_COMPLETE = 1;
     static final int PING_STARTED = 2;
 
     private static final String TAG = "NetworkScannerActivity";
     private static final String HOST_IP = "host_ip";
+    private static final String DIALOG_HOST_SELECT = "dialogHostSelect";
 
     private EditText mTargetServer;
     private RecyclerView mHostRecyclerView;
@@ -169,7 +173,6 @@ public class NetworkScannerActivity extends AppCompatActivity {
                                 mAdapter.setHosts(NetworkLab.get().getHosts());
                                 mAdapter.notifyDataSetChanged();
                             }
-
                         }
                         break;
                     case PING_STARTED:
@@ -237,6 +240,13 @@ public class NetworkScannerActivity extends AppCompatActivity {
         mNetworkManager.cancelAll();
     }
 
+    @Override
+    public void onDialogPositiveClick(String host) {
+        DefaultPreferences.setIp(this, host);
+        //mTargetServer.getText().clear();
+        mTargetServer.setText(host);
+    }
+
     private class NetworkHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private ImageView mHostIcon;
         private TextView mHostLabel;
@@ -264,7 +274,9 @@ public class NetworkScannerActivity extends AppCompatActivity {
         // TODO on click listener on to the view that will set the host
         @Override
         public void onClick(View v) {
-
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            HostSelectDialog dialog = HostSelectDialog.newInstance(mHost.getIp());
+            dialog.show(fragmentManager, DIALOG_HOST_SELECT);
         }
     }
 

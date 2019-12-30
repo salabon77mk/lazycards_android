@@ -14,4 +14,8 @@
 
     <string name="host_label">Host</string>
 
+    <string name="host_select_title">Host Selection</string>
+    <string name="host_select_text">Set %1$s as your current host?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>
