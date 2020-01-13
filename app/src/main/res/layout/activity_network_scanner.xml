@@ -4,15 +4,26 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/network_scanner_host_text_view"
+        android:id="@+id/network_scanner_host_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:gravity="center"
+        android:inputType="numberDecimal"
+        android:importantForAutofill="no"
         android:hint="@string/change_host_text" />
 
-
+    <EditText
+        android:id="@+id/network_scanner_port_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:gravity="center"
+        android:inputType="number"
+        android:importantForAutofill="no"
+        android:hint="@string/change_port_text" />
 
     <ProgressBar
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
@@ -27,7 +38,6 @@
         android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/network_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

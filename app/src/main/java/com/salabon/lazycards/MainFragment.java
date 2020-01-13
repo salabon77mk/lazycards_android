@@ -1,6 +1,9 @@
 package com.salabon.lazycards;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,6 +28,7 @@ public class MainFragment extends Fragment {
 
     private EditText mVocabWord;
     private EditText mTags;
+    private Button mDecksButton;
     private Button mSubmitButton;
     private Button mTMPNetScanButton;
 
@@ -40,6 +44,15 @@ public class MainFragment extends Fragment {
 
         mVocabWord = v.findViewById(R.id.vocab_word_edit_text);
         mTags = v.findViewById(R.id.main_fragment_tags_edit_text);
+
+        mDecksButton = v.findViewById(R.id.decks_button);
+        mDecksButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = DeckService.newIntentGetDecks(getActivity());
+                getActivity().startService(i);
+            }
+        });
 
         mSubmitButton = v.findViewById(R.id.submit_word_button);
         // TODO implement the async to submit to server
@@ -97,5 +110,23 @@ public class MainFragment extends Fragment {
         return DefaultPreferences.getIp(getActivity()) != null;
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        IntentFilter filter = new IntentFilter(DeckService.ACTION_FINISHED);
+        getActivity().registerReceiver(mOnDeckServiceFinished, filter, DeckService.PERM_PRIVATE, null);
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(mOnDeckServiceFinished);
+    }
+
+    private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(getActivity(), "WOOO", Toast.LENGTH_SHORT).show();
+        }
+    };
 }

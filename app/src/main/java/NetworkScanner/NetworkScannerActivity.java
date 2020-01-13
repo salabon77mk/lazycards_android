@@ -12,7 +12,7 @@ import android.net.wifi.WifiManager;
 
 import android.os.Bundle;
 import android.os.Handler;
-;
+
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,7 +29,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,6 +48,7 @@ implements HostSelectDialog.HostSelectDialogListener {
     private static final String DIALOG_HOST_SELECT = "dialogHostSelect";
 
     private EditText mTargetServer;
+    private EditText mHostPort;
     private RecyclerView mHostRecyclerView;
     private ProgressBar mProgressBar;
 
@@ -77,6 +77,7 @@ implements HostSelectDialog.HostSelectDialogListener {
         }
 
         setTargetServer();
+        setHostPort();
         mHostRecyclerView = findViewById(R.id.network_recycler_view);
         mHostRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -125,13 +126,39 @@ implements HostSelectDialog.HostSelectDialogListener {
 
     // Change the current host that will receive the flashcards
     private void setTargetServer(){
-        mTargetServer = findViewById(R.id.network_scanner_host_text_view);
+        mTargetServer = findViewById(R.id.network_scanner_host_edit_text);
         String ip = DefaultPreferences.getIp(this);
         if(ip != null) {
             mTargetServer.setText(ip);
         }
 
         mTargetServer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                DefaultPreferences.setIp(NetworkScannerActivity.this, s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    private void setHostPort(){
+        mHostPort = findViewById(R.id.network_scanner_host_edit_text);
+        String port = DefaultPreferences.getPort(this);
+
+        if(port != null){
+            mHostPort.setText(port);
+        }
+
+        mHostPort.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -243,7 +270,6 @@ implements HostSelectDialog.HostSelectDialogListener {
     @Override
     public void onDialogPositiveClick(String host) {
         DefaultPreferences.setIp(this, host);
-        //mTargetServer.getText().clear();
         mTargetServer.setText(host);
     }
 
@@ -254,7 +280,7 @@ implements HostSelectDialog.HostSelectDialogListener {
 
         private Host mHost;
 
-        public NetworkHolder(LayoutInflater inflater, ViewGroup parent){
+        NetworkHolder(LayoutInflater inflater, ViewGroup parent){
             super(inflater.inflate(R.layout.list_item_network, parent, false));
 
             itemView.setOnClickListener(this);
@@ -264,14 +290,13 @@ implements HostSelectDialog.HostSelectDialogListener {
             mHostIp = itemView.findViewById(R.id.ip_label);
         }
 
-        public void bind(Host host){
+        void bind(Host host){
             mHost = host;
 
             mHostLabel.setText(R.string.host_label);
             mHostIp.setText(mHost.getIp());
         }
 
-        // TODO on click listener on to the view that will set the host
         @Override
         public void onClick(View v) {
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -283,7 +308,7 @@ implements HostSelectDialog.HostSelectDialogListener {
     private class NetworkAdapter extends RecyclerView.Adapter<NetworkHolder>{
         List<Host> mHosts;
 
-        public NetworkAdapter(List<Host> hosts){
+        NetworkAdapter(List<Host> hosts){
             mHosts = hosts;
         }
 

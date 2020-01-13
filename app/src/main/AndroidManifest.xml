@@ -2,9 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.salabon.lazycards">
 
+    <permission android:name="com.salabon.lazycards.PRIVATE"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <uses-permission android:name="com.salabon.lazycards.PRIVATE"/>
 
     <application
         android:allowBackup="true"
@@ -12,7 +17,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+
+        android:usesCleartextTraffic="true">
+        <!-- Remove android:usesCleartextTraffic if HTTPS is implemented -->
 
         <activity
             android:name="NetworkScanner.NetworkScannerActivity"
@@ -26,6 +34,7 @@
         </activity>
         
         <service android:name=".UploadCardService"/>
+        <service android:name=".DeckService"/>
     </application>
 
 </manifest>

@@ -25,12 +25,12 @@ class UploadCardService extends IntentService {
     private static final String EXTRA_TAGS =
             "com.salabon.lazycards.tags";
 
-    static Intent newIntent(Context context, String word, String deck,
-                            String anki_action, String[] tags){
+    static Intent newIntentWithCard(Context context, String word, String deck,
+                            int ankiAction, String[] tags){
         Intent intent = new Intent(context, UploadCardService.class);
         intent.putExtra(EXTRA_WORD, word);
         intent.putExtra(EXTRA_DECK, deck);
-        intent.putExtra(EXTRA_ANKI_ACTION, anki_action);
+        intent.putExtra(EXTRA_ANKI_ACTION, ankiAction);
         intent.putExtra(EXTRA_TAGS, tags);
 
         return intent;
@@ -46,6 +46,7 @@ class UploadCardService extends IntentService {
 
         if(payload != null){
             //network stuff
+            // TODO upload to target server
         }
     }
 

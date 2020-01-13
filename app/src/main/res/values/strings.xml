@@ -4,6 +4,7 @@
     <string name="card_vocab_hint">Enter your vocab word</string>
     <string name="tags">Tags</string>
     <string name="submit_button">Submit</string>
+    <string name="decks">Decks</string>
 
     <string name="TMP_network_scan">Net_Scan</string>
 
@@ -11,6 +12,7 @@
 
     <string name="host_not_set_text">No host has been selected </string>
     <string name="change_host_text">Change host IP</string>
+    <string name="change_port_text">Change port</string>
     <string name="rescan_text">Rescan</string>
 
     <string name="host_label">Host</string>
