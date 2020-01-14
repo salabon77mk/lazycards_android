@@ -19,4 +19,11 @@ final class Anki {
     final class JsonResults{
         static final String RESULT = "result";
     }
+
+    final class ActionResult{
+        static final int SUCCESS = 1;
+        static final int OTHER_ERROR = 0;
+        static final int APACHE_SERVER_DOWN = -1;
+        static final int ANKI_SERVER_DOWN = -2;
+    }
 }

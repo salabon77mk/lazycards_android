@@ -3,15 +3,21 @@ package com.salabon.lazycards;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,28 +28,24 @@ public class DeckService extends IntentService {
             "com.salabon.lazycards.FINISHED";
     static final String PERM_PRIVATE =
             "com.salabon.lazycards.PRIVATE";
+    static final String ACTION_STATUS =
+            "com.salabon.lazycards.STATUS";
 
+    private static final String TAG = "DeckService";
     private static final String EXTRA_ACTION =
             "com.salabon.lazycards.getDeckNames";
 
     private static final int TIMEOUT = 3000;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     *
-     */
     public DeckService() {
-        super("DeckService");
+        super(TAG);
     }
-
 
     static Intent newIntentGetDecks(Context context){
         Intent intent = new Intent(context, DeckService.class);
         intent.putExtra(EXTRA_ACTION, Anki.Actions.GET_DECK_NAMES);
         return intent;
     }
-
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
@@ -57,6 +59,8 @@ public class DeckService extends IntentService {
         }
     }
 
+    // Queries the LazyCards server and gets back the list of available decks
+    // Errors: Anki could be down
     private void getDecks(){
         try {
             String strUrl = Anki.Endpoints.HTTP + DefaultPreferences.getIp(this) + Anki.Endpoints.GET_DECKS;
@@ -67,12 +71,11 @@ public class DeckService extends IntentService {
 
             int responseCode = con.getResponseCode();
 
-            // TODO handle the response codes
             if(responseCode == HTTPStatusCode.INTERNAL_SERVER_ERROR){
-
+                finished(Anki.ActionResult.OTHER_ERROR);
             }
             if(responseCode ==  HTTPStatusCode.SERVICE_UNAVAILABLE){
-
+                finished(Anki.ActionResult.ANKI_SERVER_DOWN);
             }
 
             BufferedReader in = new BufferedReader(
@@ -97,18 +100,25 @@ public class DeckService extends IntentService {
             }
 
             DefaultPreferences.setDecks(this, decks);
-            finished();
+            finished(Anki.ActionResult.SUCCESS);
         }
-        // TODO Flesh out all the excveptions
-        catch(Exception ex){
-            System.out.println("woops");
-            ex.printStackTrace();
+        catch (ConnectException e){
+            finished(Anki.ActionResult.APACHE_SERVER_DOWN);
+        }
+        // following two exceptions shouldn't happen?
+        catch (IOException e) {
+            Log.e(TAG, "IO Exception");
+            e.printStackTrace();
+        } catch (JSONException e) {
+            Log.e(TAG, "JSON Exception");
+            e.printStackTrace();
         }
     }
 
-    // Currently a function as I think this might be used often
-    private void finished(){
+
+    private void finished(int msg){
         Intent i = new Intent(ACTION_FINISHED);
+        i.putExtra(ACTION_STATUS, msg);
         sendBroadcast(i, PERM_PRIVATE);
     }
 }

@@ -11,6 +11,7 @@ public final class DefaultPreferences {
     private static final String PREF_IP = "ip";
     private static final String PREF_PORT = "port";
     private static final String PREF_DECKS = "decks";
+    private static final String PREF_CURR_DECK = "curr_deck";
 
     public static void setIp(Context context, String ip){
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -43,5 +44,16 @@ public final class DefaultPreferences {
 
     public static Set<String> getDecks(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context).getStringSet(PREF_DECKS, null);
+    }
+
+    public static void setCurrentDeck(Context context, String deck){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putString(PREF_CURR_DECK, deck)
+                .apply();
+    }
+
+    public static String getCurrentDeck(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_CURR_DECK, null);
     }
 }

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import com.salabon.lazycards.R;
@@ -16,7 +17,7 @@ import com.salabon.lazycards.R;
 public class HostSelectDialog extends DialogFragment {
     private static final String ARG_HOST = "host";
 
-    HostSelectDialogListener listener;
+    HostSelectDialogListener mListener;
 
     public interface HostSelectDialogListener{
         void onDialogPositiveClick(String host);
@@ -35,11 +36,12 @@ public class HostSelectDialog extends DialogFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        listener = (HostSelectDialogListener) context;
+        mListener = (HostSelectDialogListener) context;
     }
 
 
     @Override
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState){
         final String host = (String) getArguments().getSerializable(ARG_HOST);
 
@@ -55,7 +57,7 @@ public class HostSelectDialog extends DialogFragment {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        listener.onDialogPositiveClick(host);
+                        mListener.onDialogPositiveClick(host);
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {

@@ -4,7 +4,8 @@
     <string name="card_vocab_hint">Enter your vocab word</string>
     <string name="tags">Tags</string>
     <string name="submit_button">Submit</string>
-    <string name="decks">Decks</string>
+    <string name="get_decks">Get Decks</string>
+    <string name="no_deck_selected">No Deck Selected</string>
 
     <string name="TMP_network_scan">Net_Scan</string>
 
@@ -21,4 +22,18 @@
     <string name="host_select_text">Set %1$s as your current host?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <string name="deck_select_dialog">Select your target deck</string>
+
+
+    <string name="error_dialog_title">Error Description:</string>
+    <string name="apache_server_down">Your apache/nginx server is unreachable. \n
+        Causes: \n
+        1. The currently selected host is wrong \n
+        2. The apache/nginx server is not running</string>
+    <string name="anki_server_down">Your Anki server is down.\n
+        Causes: \n
+        1. Anki is not running on the target server \n
+        2. Anki connect has not been installed</string>
+    <string name="other_server_error">Something internal with AnkiConnect has gone wrong.</string>
 </resources>

@@ -330,7 +330,7 @@ implements HostSelectDialog.HostSelectDialogListener {
             return mHosts.size();
         }
 
-        public void setHosts(List<Host> hosts){
+        void setHosts(List<Host> hosts){
             mHosts = hosts;
         }
     }

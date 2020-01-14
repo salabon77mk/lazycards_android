@@ -1,34 +1,38 @@
 package com.salabon.lazycards;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import androidx.fragment.app.FragmentManager;
 
 import NetworkScanner.NetworkScannerActivity;
 
 public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
 
+    private static final String DECK_DIALOG = "deck_select_dialog";
+    private static final String SERVER_ERROR_DIALOG = "server_error_dialog";
+
+    private static final int REQUEST_DECK = 0;
+
     private EditText mVocabWord;
     private EditText mTags;
-    private Button mDecksButton;
+    private Button mCurrentDeckButton;
+    private Button mGetDecksButton;
     private Button mSubmitButton;
     private Button mTMPNetScanButton;
 
@@ -45,8 +49,23 @@ public class MainFragment extends Fragment {
         mVocabWord = v.findViewById(R.id.vocab_word_edit_text);
         mTags = v.findViewById(R.id.main_fragment_tags_edit_text);
 
-        mDecksButton = v.findViewById(R.id.decks_button);
-        mDecksButton.setOnClickListener(new View.OnClickListener() {
+        mCurrentDeckButton = v.findViewById(R.id.current_deck_text);
+        String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
+        if(currDeck != null){
+            mCurrentDeckButton.setText(currDeck);
+        }
+        mCurrentDeckButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getFragmentManager();
+                DeckSelectDialog dialog = new DeckSelectDialog();
+                dialog.setTargetFragment(MainFragment.this, REQUEST_DECK);
+                dialog.show(fragmentManager, DECK_DIALOG);
+            }
+        });
+
+        mGetDecksButton = v.findViewById(R.id.get_decks_button);
+        mGetDecksButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = DeckService.newIntentGetDecks(getActivity());
@@ -81,6 +100,34 @@ public class MainFragment extends Fragment {
         return v;
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        IntentFilter filter = new IntentFilter(DeckService.ACTION_FINISHED);
+        getActivity().registerReceiver(mOnDeckServiceFinished, filter, DeckService.PERM_PRIVATE, null);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(mOnDeckServiceFinished);
+    }
+
+    private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(getActivity(), "WOOO", Toast.LENGTH_SHORT).show();
+            int status = intent.getIntExtra(DeckService.ACTION_STATUS, 0);
+
+            if(status == Anki.ActionResult.SUCCESS){
+
+            }
+            else {
+                createErrorDialog(status);
+            }
+        }
+    };
+
     // Before committing to a submit, we check the length first, then create the async
     private void submitWord(){
         String editWord = mVocabWord.getText().toString();
@@ -110,23 +157,22 @@ public class MainFragment extends Fragment {
         return DefaultPreferences.getIp(getActivity()) != null;
     }
 
-    @Override
-    public void onResume(){
-        super.onResume();
-        IntentFilter filter = new IntentFilter(DeckService.ACTION_FINISHED);
-        getActivity().registerReceiver(mOnDeckServiceFinished, filter, DeckService.PERM_PRIVATE, null);
+    public void createErrorDialog(int errorCode){
+        FragmentManager fragmentManager = getFragmentManager();
+        ServerErrorDialog errorDialog = ServerErrorDialog.newInstance(errorCode);
+        errorDialog.show(fragmentManager, SERVER_ERROR_DIALOG);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        getActivity().unregisterReceiver(mOnDeckServiceFinished);
-    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode != Activity.RESULT_OK) return;
 
-    private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Toast.makeText(getActivity(), "WOOO", Toast.LENGTH_SHORT).show();
+        if(requestCode == REQUEST_DECK){
+            String selectedDeck = data.getStringExtra(DeckSelectDialog.EXTRA_SELECTED_DECK);
+            DefaultPreferences.setCurrentDeck(getActivity(), selectedDeck);
+            mCurrentDeckButton.setText(selectedDeck);
         }
-    };
+    }
+
+
 }
