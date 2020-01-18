@@ -23,12 +23,12 @@ public class DeckSelectDialog extends DialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState){
         Set<String> decks = DefaultPreferences.getDecks(getActivity());
-        final CharSequence[] mDecks = decks.toArray(new CharSequence[decks.size()]);
+        final CharSequence[] mDecks = decks.toArray(new CharSequence[0]);
         // In Anki, the Default deck cannot be deleted, so there will always be ONE deck available
         mSelectedDeck = mDecks[0].toString();
 
         return new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.deck_select_dialog)
+                .setTitle(R.string.deck_select_dialog_title)
                 .setSingleChoiceItems(mDecks, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

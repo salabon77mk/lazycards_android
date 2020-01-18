@@ -49,6 +49,8 @@ public class DeckService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        if(intent == null) return;
+
         int action = intent.getIntExtra(EXTRA_ACTION, 0);
         switch (action){
             case Anki.Actions.GET_DECK_NAMES:

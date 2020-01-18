@@ -1,31 +1,40 @@
 <resources>
     <string name="app_name">LazyCards</string>
 
+    <!-- For MainFragment -->
     <string name="card_vocab_hint">Enter your vocab word</string>
     <string name="tags">Tags</string>
     <string name="submit_button">Submit</string>
-    <string name="get_decks">Get Decks</string>
+    <string name="get_decks_button">Get Decks</string>
+    <string name="options_button">Options</string>
     <string name="no_deck_selected">No Deck Selected</string>
-
+    <string name="no_decks">There are no decks, press "Get Decks"</string>
+    <string name="updated_deck_list">Updated Deck List</string>
     <string name="TMP_network_scan">Net_Scan</string>
-
     <string name="no_word_toast">Please enter a word for submission</string>
 
+    <!-- For NetworkScannerActivity -->
     <string name="host_not_set_text">No host has been selected </string>
     <string name="change_host_text">Change host IP</string>
     <string name="change_port_text">Change port</string>
     <string name="rescan_text">Rescan</string>
 
+    <!-- Host Model -->
     <string name="host_label">Host</string>
 
+    <!-- HostSelectDialog -->
     <string name="host_select_title">Host Selection</string>
     <string name="host_select_text">Set %1$s as your current host?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
-    <string name="deck_select_dialog">Select your target deck</string>
+    <!-- DeckSelectDialog -->
+    <string name="deck_select_dialog_title">Select your target deck</string>
 
+    <!-- WordOptionsDialog -->
+    <string name="word_options_dialog_title">Include the following options</string>
 
+    <!-- ServerErrorDialog -->
     <string name="error_dialog_title">Error Description:</string>
     <string name="apache_server_down">Your apache/nginx server is unreachable. \n
         Causes: \n
@@ -36,4 +45,8 @@
         1. Anki is not running on the target server \n
         2. Anki connect has not been installed</string>
     <string name="other_server_error">Something internal with AnkiConnect has gone wrong.</string>
+
+    <!-- WordOptionsDialog -->
+    <string name="everything">Everything</string>
+    <string name="deselect_all">Deselect All</string>
 </resources>

@@ -12,12 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+
+import java.util.ArrayList;
 
 import NetworkScanner.NetworkScannerActivity;
 
@@ -26,15 +26,21 @@ public class MainFragment extends Fragment {
 
     private static final String DECK_DIALOG = "deck_select_dialog";
     private static final String SERVER_ERROR_DIALOG = "server_error_dialog";
+    private static final String WORD_OPTIONS_DIALOG = "word_options_dialog";
 
     private static final int REQUEST_DECK = 0;
+    private static final int REQUEST_OPTIONS = 1;
 
     private EditText mVocabWord;
     private EditText mTags;
     private Button mCurrentDeckButton;
     private Button mGetDecksButton;
+    private Button mOptionsButton;
     private Button mSubmitButton;
     private Button mTMPNetScanButton;
+
+    private ArrayList<String> mSelectedOptions = new ArrayList<>();
+    private int mCurrentApi = Json_Keys.APIs.WORDS;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -49,20 +55,7 @@ public class MainFragment extends Fragment {
         mVocabWord = v.findViewById(R.id.vocab_word_edit_text);
         mTags = v.findViewById(R.id.main_fragment_tags_edit_text);
 
-        mCurrentDeckButton = v.findViewById(R.id.current_deck_text);
-        String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
-        if(currDeck != null){
-            mCurrentDeckButton.setText(currDeck);
-        }
-        mCurrentDeckButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getFragmentManager();
-                DeckSelectDialog dialog = new DeckSelectDialog();
-                dialog.setTargetFragment(MainFragment.this, REQUEST_DECK);
-                dialog.show(fragmentManager, DECK_DIALOG);
-            }
-        });
+        mCurrentDeckButton = createCurrentDeckButton(v);
 
         mGetDecksButton = v.findViewById(R.id.get_decks_button);
         mGetDecksButton.setOnClickListener(new View.OnClickListener() {
@@ -79,9 +72,17 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 submitWord();
-                Log.i(TAG, "VocabWord: " + mVocabWord.getText().toString());
-                Log.i(TAG, "VocabWord Length: " +
-                        mVocabWord.getText().toString().length());
+            }
+        });
+
+        mOptionsButton = v.findViewById(R.id.options_button);
+        mOptionsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager manager = getFragmentManager();
+                WordOptionsDialog dialog = WordOptionsDialog.newWordOptionsDialog(mCurrentApi);
+                dialog.setTargetFragment(MainFragment.this, REQUEST_OPTIONS);
+                dialog.show(manager, WORD_OPTIONS_DIALOG);
             }
         });
 
@@ -96,6 +97,8 @@ public class MainFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        setSelectedOptionsDefault();
 
         return v;
     }
@@ -116,11 +119,11 @@ public class MainFragment extends Fragment {
     private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(getActivity(), "WOOO", Toast.LENGTH_SHORT).show();
+
             int status = intent.getIntExtra(DeckService.ACTION_STATUS, 0);
 
             if(status == Anki.ActionResult.SUCCESS){
-
+                Toast.makeText(getActivity(), getString(R.string.updated_deck_list), Toast.LENGTH_SHORT).show();
             }
             else {
                 createErrorDialog(status);
@@ -157,12 +160,46 @@ public class MainFragment extends Fragment {
         return DefaultPreferences.getIp(getActivity()) != null;
     }
 
+
     public void createErrorDialog(int errorCode){
         FragmentManager fragmentManager = getFragmentManager();
         ServerErrorDialog errorDialog = ServerErrorDialog.newInstance(errorCode);
         errorDialog.show(fragmentManager, SERVER_ERROR_DIALOG);
     }
+    
+    private Button createCurrentDeckButton(View view){
+        Button currentDeckButton = view.findViewById(R.id.current_deck_text);
 
+        String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
+        if(currDeck != null){
+            currentDeckButton.setText(currDeck);
+        }
+
+        currentDeckButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(DefaultPreferences.getDecks(getActivity()) != null) {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    DeckSelectDialog dialog = new DeckSelectDialog();
+                    dialog.setTargetFragment(MainFragment.this, REQUEST_DECK);
+                    dialog.show(fragmentManager, DECK_DIALOG);
+                }
+                else{
+                    Toast.makeText(getActivity(), getString(R.string.no_decks), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        return currentDeckButton;
+    }
+
+    /**
+     * Here we are either setting the current deck or the user options
+     * @param requestCode : The request code currently comes from dialogs (DeckSelectDialog
+     *                    and WordOptionsDialog
+     * @param resultCode : Origin of param is same as above
+     * @param data : Origin of param is same as above
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if(resultCode != Activity.RESULT_OK) return;
@@ -172,7 +209,23 @@ public class MainFragment extends Fragment {
             DefaultPreferences.setCurrentDeck(getActivity(), selectedDeck);
             mCurrentDeckButton.setText(selectedDeck);
         }
+        else if(requestCode == REQUEST_OPTIONS){
+            ArrayList<String> selectedOptions = data.getStringArrayListExtra(WordOptionsDialog.EXTRA_SELECTED_OPTIONS);
+            if(selectedOptions != null && !selectedOptions.isEmpty()){
+                mSelectedOptions = selectedOptions;
+            }
+            else{
+                setSelectedOptionsDefault();
+            }
+        }
     }
 
-
+    /**
+     * There must always be at least ONE default option
+     */
+    private void setSelectedOptionsDefault(){
+        if(mCurrentApi == Json_Keys.APIs.WORDS){
+            mSelectedOptions.add(Words_API.DEFAULT);
+        }
+    }
 }

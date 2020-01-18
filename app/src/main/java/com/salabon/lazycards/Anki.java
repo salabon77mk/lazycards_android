@@ -12,7 +12,9 @@ final class Anki {
         static final String wsgiAlias = "/lazycards";
         static final String HTTP = "http://";
 
+        // If these values are edited, then the routes in lazycards.py must be edited as well
         static final String GET_DECKS = wsgiAlias + "/get_decks";
+        static final String CARD_CRUD = wsgiAlias + "/add_note";
     }
 
     // This class represents the json response body
