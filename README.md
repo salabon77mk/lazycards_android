@@ -7,14 +7,14 @@ what you'd like to include in your definition, and submit it away.
 
 ## REQUIREMENTS
 
-[Anki](https://apps.ankiweb.net/) installed on a Linux/Windows/MacOS
-[AnkiConnect](https://ankiweb.net/shared/info/2055492159)
-[LazyCards Server](https://github.com/salabon77mk/lazycards_server)
-Android device (for the app!)
+* [Anki](https://apps.ankiweb.net/) installed on a Linux/Windows/MacOS
+* [AnkiConnect](https://ankiweb.net/shared/info/2055492159)
+* [LazyCards Server](https://github.com/salabon77mk/lazycards_server)
+* Android device (for the app!)
 
 ### First Time Use
 
-(Temporary) On the homescreen, press the NET_SCAN button, and either select a device or input the
+(Temporary) On the homescreen, press the NET\_SCAN button, and either select a device or input the
 IP address of the device that is hosting the LazyCards Server.
 
 ### APIs currently supported
