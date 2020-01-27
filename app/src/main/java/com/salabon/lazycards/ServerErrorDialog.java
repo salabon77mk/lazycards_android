@@ -30,6 +30,9 @@ public class ServerErrorDialog extends DialogFragment {
             case Anki.ActionResult.ANKI_SERVER_DOWN:
                 errorMessage = getString(R.string.anki_server_down);
                 break;
+            case Anki.ActionResult.APACHE_UNREACHABLE:
+                errorMessage = getString(R.string.apache_server_unreachable);
+                break;
             case Anki.ActionResult.OTHER_ERROR:
                 errorMessage = getString(R.string.other_server_error);
                 break;

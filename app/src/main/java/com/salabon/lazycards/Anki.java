@@ -14,7 +14,7 @@ final class Anki {
 
         // If these values are edited, then the routes in lazycards.py must be edited as well
         static final String GET_DECKS = wsgiAlias + "/get_decks";
-        static final String CARD_CRUD = wsgiAlias + "/add_note";
+        static final String ADD_NOTE = wsgiAlias + "/add_note";
     }
 
     // This class represents the json response body
@@ -27,5 +27,6 @@ final class Anki {
         static final int OTHER_ERROR = 0;
         static final int APACHE_SERVER_DOWN = -1;
         static final int ANKI_SERVER_DOWN = -2;
+        static final int APACHE_UNREACHABLE = -3;
     }
 }

@@ -80,7 +80,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentManager manager = getFragmentManager();
-                WordOptionsDialog dialog = WordOptionsDialog.newWordOptionsDialog(mCurrentApi);
+                WordOptionsDialog dialog = WordOptionsDialog.newInstance(mCurrentApi);
                 dialog.setTargetFragment(MainFragment.this, REQUEST_OPTIONS);
                 dialog.show(manager, WORD_OPTIONS_DIALOG);
             }
@@ -119,7 +119,6 @@ public class MainFragment extends Fragment {
     private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             int status = intent.getIntExtra(DeckService.ACTION_STATUS, 0);
 
             if(status == Anki.ActionResult.SUCCESS){
@@ -133,15 +132,20 @@ public class MainFragment extends Fragment {
 
     // Before committing to a submit, we check the length first, then create the async
     private void submitWord(){
-        String editWord = mVocabWord.getText().toString();
+        String editWord = mVocabWord.getText().toString().toLowerCase();
         if (!editWord.isEmpty()){
             String[] tags = splitAndCLeanTags();
+            String[] ops = mSelectedOptions.toArray(new String[0]);
+            String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
 
-            //Construct the JSON query could probably made into its own method??
-            // TODO forward to service
+            Intent i = UploadCardService.newIntentCreateCard(getActivity(), editWord,
+                    currDeck, mCurrentApi, tags, ops);
+
+            getActivity().startService(i);
         }
-
-        Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
+        else {
+            Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private String[] splitAndCLeanTags(){
@@ -161,7 +165,7 @@ public class MainFragment extends Fragment {
     }
 
 
-    public void createErrorDialog(int errorCode){
+    private void createErrorDialog(int errorCode){
         FragmentManager fragmentManager = getFragmentManager();
         ServerErrorDialog errorDialog = ServerErrorDialog.newInstance(errorCode);
         errorDialog.show(fragmentManager, SERVER_ERROR_DIALOG);
@@ -224,6 +228,7 @@ public class MainFragment extends Fragment {
      * There must always be at least ONE default option
      */
     private void setSelectedOptionsDefault(){
+        mSelectedOptions.clear();
         if(mCurrentApi == Json_Keys.APIs.WORDS){
             mSelectedOptions.add(Words_API.DEFAULT);
         }
