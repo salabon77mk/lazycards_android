@@ -65,6 +65,7 @@ public class DeckService extends IntentService {
     // Errors: Anki could be down
     private void getDecks(){
         try {
+            // TODO Change below line to accomdate custom port options
             String strUrl = Anki.Endpoints.HTTP + DefaultPreferences.getIp(this) + Anki.Endpoints.GET_DECKS;
             URL url = new URL(strUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -109,14 +110,12 @@ public class DeckService extends IntentService {
         }
         // following two exceptions shouldn't happen?
         catch (IOException e) {
-            Log.e(TAG, "IO Exception");
-            e.printStackTrace();
+            finished(Anki.ActionResult.APACHE_UNREACHABLE);
         } catch (JSONException e) {
             Log.e(TAG, "JSON Exception");
             e.printStackTrace();
         }
     }
-
 
     private void finished(int msg){
         Intent i = new Intent(ACTION_FINISHED);

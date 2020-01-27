@@ -38,8 +38,11 @@
     <string name="error_dialog_title">Error Description:</string>
     <string name="apache_server_down">Your apache/nginx server is unreachable. \n
         Causes: \n
-        1. The currently selected host is wrong \n
-        2. The apache/nginx server is not running</string>
+        1. The apache/nginx server is not running</string>
+    <string name="apache_server_unreachable">Your apache/nginx server is unreachable. \n
+    Causes: \n
+        1. The currently selected host is unreachable or does not even exist
+    </string>
     <string name="anki_server_down">Your Anki server is down.\n
         Causes: \n
         1. Anki is not running on the target server \n

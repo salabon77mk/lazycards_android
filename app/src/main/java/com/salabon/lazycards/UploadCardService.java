@@ -8,6 +8,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -15,8 +16,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ConnectException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+
+import static com.salabon.lazycards.DeckService.ACTION_FINISHED;
+import static com.salabon.lazycards.DeckService.ACTION_STATUS;
+import static com.salabon.lazycards.DeckService.PERM_PRIVATE;
+
 // Responsible for creating, deleting, updating, fetching cards
-class UploadCardService extends IntentService {
+public class UploadCardService extends IntentService {
 
     private static final String TAG = "uploadcardservice";
     private static final String EXTRA_WORD =
@@ -34,7 +49,7 @@ class UploadCardService extends IntentService {
 
     private static final int CREATE = 0; // create new card
 
-    /*
+    /**
     * @param word : Word to retrieve definition of
     * @param deck : Deck to add card to
     * @param api : The api that will be used
@@ -79,6 +94,7 @@ class UploadCardService extends IntentService {
         if(payload != null){
             switch (action){
                 case CREATE:
+                    sendNewCard(payload);
                     break;
                 default:
             }
@@ -119,22 +135,81 @@ class UploadCardService extends IntentService {
             payload.put(Json_Keys.DECK, deck);
             payload.put(Json_Keys.API, api);
 
-            JSONArray jsonTags = new JSONArray();
-            for(int i = 0; i < tags.length; i++){
-                jsonTags.put(tags[i]);
-            }
-            payload.put(Json_Keys.TAGS, jsonTags);
-
-            JSONArray jsonOptions = new JSONArray();
-            for(String op : options){
-                jsonOptions.put(op);
-            }
-            payload.put(Json_Keys.OPTIONS, jsonOptions);
+            addArrayToPayload(payload, Json_Keys.TAGS, tags);
+            addArrayToPayload(payload, Json_Keys.OPTIONS, options);
 
         } catch (JSONException e) {
             return null;
         }
         return payload;
+    }
+
+    private void sendNewCard(JSONObject payload){
+        String strUrl = Anki.Endpoints.HTTP + DefaultPreferences.getIp(this)
+                + Anki.Endpoints.ADD_NOTE;
+        try {
+            URL url = new URL(strUrl);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setRequestProperty("Accept", "application/json");
+            con.setDoOutput(true);
+
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+
+            wr.write(payload.toString().getBytes());
+            wr.flush();
+            wr.close();
+
+            int responseCode = con.getResponseCode();
+
+            //TODO replace this if block with ServerCommService.handleError
+            if(responseCode == HTTPStatusCode.INTERNAL_SERVER_ERROR){
+                finished(Anki.ActionResult.OTHER_ERROR);
+                return;
+            }
+            else if(responseCode ==  HTTPStatusCode.SERVICE_UNAVAILABLE){
+                finished(Anki.ActionResult.ANKI_SERVER_DOWN);
+                return;
+            }
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // TODO handle the response, put it in database of uploaded cards
+        }
+        catch (ConnectException e){
+            finished(Anki.ActionResult.APACHE_SERVER_DOWN);
+        }
+        catch (IOException e) {
+            finished(Anki.ActionResult.APACHE_UNREACHABLE);
+        }
+    }
+
+    // TODO Remove this bit of code duplication, also found in DeckService
+    // Create an abstract class that extends IntentService?
+    private void finished(int msg){
+        Intent i = new Intent(ACTION_FINISHED);
+        i.putExtra(ACTION_STATUS, msg);
+        sendBroadcast(i, PERM_PRIVATE);
+    }
+
+    private void addArrayToPayload(JSONObject payload, String jsonKey, String[] args) throws JSONException {
+        if(args == null) return;
+
+        JSONArray arr = new JSONArray();
+        for(String s : args){
+            arr.put(s);
+        }
+        payload.put(jsonKey, arr);
     }
 
 }
