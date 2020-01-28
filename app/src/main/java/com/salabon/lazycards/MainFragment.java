@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,7 +66,6 @@ public class MainFragment extends Fragment {
         });
 
         mSubmitButton = v.findViewById(R.id.submit_word_button);
-        // TODO implement the async to submit to server
         mSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,13 +117,25 @@ public class MainFragment extends Fragment {
     private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int status = intent.getIntExtra(DeckService.ACTION_STATUS, 0);
+            int status = intent.getIntExtra(ServerCommService.ACTION_STATUS, 0);
 
             if(status == Anki.ActionResult.SUCCESS){
-                Toast.makeText(getActivity(), getString(R.string.updated_deck_list), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.success), Toast.LENGTH_SHORT).show();
             }
-            else {
-                createErrorDialog(status);
+            else{
+                FragmentManager fragmentManager = getFragmentManager();
+                ServerErrorDialog dialog;
+                // These handle the custom messages received from either the currently selected API
+                // or AnkiConnect
+                if(status == Anki.ActionResult.ANKI_CONNECT_ERROR
+                        || status == Anki.ActionResult.API_ERROR){
+                    String body = intent.getStringExtra(ServerCommService.ERROR_BODY);
+                    dialog = ServerErrorDialog.newInstance(status, body);
+                }
+                else{
+                    dialog = ServerErrorDialog.newInstance(status);
+                }
+                dialog.show(fragmentManager, SERVER_ERROR_DIALOG);
             }
         }
     };
@@ -138,7 +148,7 @@ public class MainFragment extends Fragment {
             String[] ops = mSelectedOptions.toArray(new String[0]);
             String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
 
-            Intent i = UploadCardService.newIntentCreateCard(getActivity(), editWord,
+            Intent i = CardService.newIntentCreateCard(getActivity(), editWord,
                     currDeck, mCurrentApi, tags, ops);
 
             getActivity().startService(i);
@@ -162,13 +172,6 @@ public class MainFragment extends Fragment {
     // If the IP is not set, create a dialog asking user if they'd like to perform a netscan
     private boolean isIpSet(){
         return DefaultPreferences.getIp(getActivity()) != null;
-    }
-
-
-    private void createErrorDialog(int errorCode){
-        FragmentManager fragmentManager = getFragmentManager();
-        ServerErrorDialog errorDialog = ServerErrorDialog.newInstance(errorCode);
-        errorDialog.show(fragmentManager, SERVER_ERROR_DIALOG);
     }
     
     private Button createCurrentDeckButton(View view){

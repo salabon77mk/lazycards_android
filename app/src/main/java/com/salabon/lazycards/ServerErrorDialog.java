@@ -9,6 +9,7 @@ import androidx.fragment.app.DialogFragment;
 
 public class ServerErrorDialog extends DialogFragment {
     private static final String ARG_ERROR = "error";
+    private static final String STR_ERROR = "str_err";
 
     static ServerErrorDialog newInstance(int errorCode){
         Bundle args = new Bundle();
@@ -17,6 +18,16 @@ public class ServerErrorDialog extends DialogFragment {
         ServerErrorDialog serverErrorDialog = new ServerErrorDialog();
         serverErrorDialog.setArguments(args);
         return serverErrorDialog;
+    }
+
+    static ServerErrorDialog newInstance(int errorCode, String error){
+        Bundle args = new Bundle();
+        args.putString(STR_ERROR, error);
+        args.putInt(ARG_ERROR, errorCode);
+
+        ServerErrorDialog dialog = new ServerErrorDialog();
+        dialog.setArguments(args);
+        return dialog;
     }
 
     @Override
@@ -33,13 +44,21 @@ public class ServerErrorDialog extends DialogFragment {
             case Anki.ActionResult.APACHE_UNREACHABLE:
                 errorMessage = getString(R.string.apache_server_unreachable);
                 break;
+            case Anki.ActionResult.ANKI_CONNECT_ERROR:
+                errorMessage = getString(R.string.anki_connect_error)
+                    + getArguments().getString(STR_ERROR);
+                break;
             case Anki.ActionResult.OTHER_ERROR:
                 errorMessage = getString(R.string.other_server_error);
                 break;
+            case Anki.ActionResult.API_ERROR:
+                errorMessage = getString(R.string.api_error) +
+                        getArguments().getString(STR_ERROR);
+                break;
+
             default:
-                // This one should never happen unless new error states were introduced
-                // but not accounted for in the switch statement
-                errorMessage = "A new error was introduced but not implemented";
+                // Custom error message
+                errorMessage = getArguments().getString(STR_ERROR);
         }
 
         return new AlertDialog.Builder(getActivity())

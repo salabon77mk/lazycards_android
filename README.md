@@ -19,4 +19,39 @@ IP address of the device that is hosting the LazyCards Server.
 
 ### APIs currently supported
 
-[WordsAPI](https://www.wordsapi.com/) 
+[WordsAPI](https://www.wordsapi.com/)
+
+
+### Demo
+1. Input a word
+![enter word](../pictures/lazycards_demo/01_enter_word.jpg)
+
+2. Select your deck
+![select deck](../pictures/lazycards_demo/02_select_deck.jpg)
+
+3. Choose the options you'd like to include as part of your flashcard
+![options](../pictures/lazycards_demo/03_select_options.jpg)
+
+4. Submit your word!
+![submission success](../pictures/lazycards_demo/04_submit_success.jpg)
+
+5. Check out Anki. A new word!
+![new card](../pictures/lazycards_demo/05_new_card.png)
+
+6. Here's the definition with the options you selected. Looks like the API couldn't find antonyms
+for taste
+![definition](../pictures/lazycards_demo/06_card_definition.png)
+
+
+### Network Scanner Demo
+1. The scan just started!
+![start scan](../pictures/lazycards_demo/net_scan_demo/01_start_scan.jpg)
+
+2. Getting some results
+![partial results list](../pictures/lazycards_demo/net_scan_demo/02_some_results.jpg)
+
+3. Scan complete and results sorted via Key-Index sort
+![full results](../pictures/lazycards_demo/net_scan_demo/03_scan_complete.jpg)
+
+4. Select your host and your port optionally as well too!
+![host select](../pictures/lazycards_demo/net_scan_demo/04_host_select.jpg)

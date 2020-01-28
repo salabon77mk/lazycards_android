@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">LazyCards</string>
+    <string name="success">Success!</string>
+
 
     <!-- For MainFragment -->
     <string name="card_vocab_hint">Enter your vocab word</string>
@@ -36,9 +38,9 @@
 
     <!-- ServerErrorDialog -->
     <string name="error_dialog_title">Error Description:</string>
-    <string name="apache_server_down">Your apache/nginx server is unreachable. \n
+    <string name="apache_server_down">Your apache/nginx server is down. \n
         Causes: \n
-        1. The apache/nginx server is not running</string>
+        1. The apache/nginx service on your server host is not running</string>
     <string name="apache_server_unreachable">Your apache/nginx server is unreachable. \n
     Causes: \n
         1. The currently selected host is unreachable or does not even exist
@@ -48,6 +50,8 @@
         1. Anki is not running on the target server \n
         2. Anki connect has not been installed</string>
     <string name="other_server_error">Something internal with AnkiConnect has gone wrong.</string>
+    <string name="anki_connect_error">Response from AnkiConnect Service: \n</string>
+    <string name="api_error">An error occurred at the currently selected API: \n</string>
 
     <!-- WordOptionsDialog -->
     <string name="everything">Everything</string>

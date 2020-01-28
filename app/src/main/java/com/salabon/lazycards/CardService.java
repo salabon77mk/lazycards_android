@@ -1,37 +1,26 @@
 package com.salabon.lazycards;
 
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.salabon.lazycards.CustomExceptions.AnkiServerDownException;
+import com.salabon.lazycards.CustomExceptions.WordException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 
-import static com.salabon.lazycards.DeckService.ACTION_FINISHED;
-import static com.salabon.lazycards.DeckService.ACTION_STATUS;
-import static com.salabon.lazycards.DeckService.PERM_PRIVATE;
 
 // Responsible for creating, deleting, updating, fetching cards
-public class UploadCardService extends IntentService {
+public class CardService extends ServerCommService {
 
     private static final String TAG = "uploadcardservice";
     private static final String EXTRA_WORD =
@@ -60,7 +49,7 @@ public class UploadCardService extends IntentService {
      */
     static Intent newIntentCreateCard(Context context, String word, String deck,
                              int api, String[] tags, String[] options){
-        Intent intent = new Intent(context, UploadCardService.class);
+        Intent intent = new Intent(context, CardService.class);
         intent.putExtra(EXTRA_WORD, word);
         intent.putExtra(EXTRA_DECK, deck);
         intent.putExtra(EXTRA_ACTION, CREATE);
@@ -71,7 +60,7 @@ public class UploadCardService extends IntentService {
         return intent;
     }
 
-    public UploadCardService() {
+    public CardService() {
         super(TAG);
     }
 
@@ -101,27 +90,6 @@ public class UploadCardService extends IntentService {
         }
     }
 
-
-    // TODO test this one CASES: No mobile data, No Wifi, and vice versa
-    private boolean isWifiConnected(){
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        if (cm != null) {
-            if (Build.VERSION.SDK_INT < 23) {
-                final NetworkInfo ni = cm.getActiveNetworkInfo();
-                if (ni != null) {
-                    return (ni.isConnected() && ni.getType() == ConnectivityManager.TYPE_WIFI);
-                }
-            } else {
-                final Network network = cm.getActiveNetwork();
-                if (network != null) {
-                    final NetworkCapabilities nc = cm.getNetworkCapabilities(network);
-                    return (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
-                }
-            }
-        }
-        return false;
-    }
-
     private JSONObject createJsonNewCard(Intent intent){
         String word = intent.getStringExtra(EXTRA_WORD);
         String deck = intent.getStringExtra(EXTRA_DECK);
@@ -145,8 +113,7 @@ public class UploadCardService extends IntentService {
     }
 
     private void sendNewCard(JSONObject payload){
-        String strUrl = Anki.Endpoints.HTTP + DefaultPreferences.getIp(this)
-                + Anki.Endpoints.ADD_NOTE;
+        String strUrl = makeUrl(Anki.Endpoints.ADD_NOTE);
         try {
             URL url = new URL(strUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -164,42 +131,26 @@ public class UploadCardService extends IntentService {
 
             int responseCode = con.getResponseCode();
 
-            //TODO replace this if block with ServerCommService.handleError
-            if(responseCode == HTTPStatusCode.INTERNAL_SERVER_ERROR){
-                finished(Anki.ActionResult.OTHER_ERROR);
-                return;
-            }
-            else if(responseCode ==  HTTPStatusCode.SERVICE_UNAVAILABLE){
-                finished(Anki.ActionResult.ANKI_SERVER_DOWN);
-                return;
-            }
+            handleApiResponseError(responseCode);
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
+            JSONObject response = getResponseAndCloseConnection(con);
+            checkAnkiConnectError(response);
             // TODO handle the response, put it in database of uploaded cards
         }
         catch (ConnectException e){
             finished(Anki.ActionResult.APACHE_SERVER_DOWN);
         }
+        catch (WordException e){
+            finishedWithErrorMessage(Anki.ActionResult.API_ERROR, e.getMessage());
+        }
+        catch (AnkiServerDownException e){
+            finished(Anki.ActionResult.ANKI_SERVER_DOWN);
+        }
         catch (IOException e) {
             finished(Anki.ActionResult.APACHE_UNREACHABLE);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-    }
-
-    // TODO Remove this bit of code duplication, also found in DeckService
-    // Create an abstract class that extends IntentService?
-    private void finished(int msg){
-        Intent i = new Intent(ACTION_FINISHED);
-        i.putExtra(ACTION_STATUS, msg);
-        sendBroadcast(i, PERM_PRIVATE);
     }
 
     private void addArrayToPayload(JSONObject payload, String jsonKey, String[] args) throws JSONException {
