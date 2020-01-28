@@ -32,7 +32,7 @@ public final class DefaultPreferences {
     }
 
     public static String getPort(Context context){
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_PORT, null);
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_PORT, "80");
     }
 
     public static void setDecks(Context context, Set<String> decks){

@@ -151,7 +151,7 @@ implements HostSelectDialog.HostSelectDialogListener {
     }
 
     private void setHostPort(){
-        mHostPort = findViewById(R.id.network_scanner_host_edit_text);
+        mHostPort = findViewById(R.id.network_scanner_port_edit_text);
         String port = DefaultPreferences.getPort(this);
 
         if(port != null){
@@ -166,7 +166,7 @@ implements HostSelectDialog.HostSelectDialogListener {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                DefaultPreferences.setIp(NetworkScannerActivity.this, s.toString());
+                DefaultPreferences.setPort(NetworkScannerActivity.this, s.toString());
             }
 
             @Override
