@@ -10,6 +10,12 @@ public abstract class ServerCommService extends IntentService {
             "com.salabon.lazycards.PRIVATE";
     static final String ACTION_STATUS =
             "com.salabon.lazycards.STATUS";
+<<<<<<< Updated upstream
+=======
+    static final String ERROR_BODY =
+            "com.salabon.lazycards.BODY";
+
+>>>>>>> Stashed changes
     private static final String TAG = "ServerCommService";
 
 

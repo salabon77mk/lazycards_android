@@ -54,10 +54,8 @@ public class DeckService extends IntentService {
         int action = intent.getIntExtra(EXTRA_ACTION, 0);
         switch (action){
             case Anki.Actions.GET_DECK_NAMES:
-                getDecks();
-                break;
+                getDecks(); break;
             default:
-                break;
         }
     }
 
@@ -65,8 +63,12 @@ public class DeckService extends IntentService {
     // Errors: Anki could be down
     private void getDecks(){
         try {
+<<<<<<< Updated upstream
             // TODO Change below line to accomdate custom port options
             String strUrl = Anki.Endpoints.HTTP + DefaultPreferences.getIp(this) + Anki.Endpoints.GET_DECKS;
+=======
+            String strUrl = makeUrl(Anki.Endpoints.GET_DECKS);
+>>>>>>> Stashed changes
             URL url = new URL(strUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setConnectTimeout(TIMEOUT);

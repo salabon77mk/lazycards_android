@@ -12,7 +12,13 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+<<<<<<< Updated upstream:app/src/main/java/com/salabon/lazycards/UploadCardService.java
 import org.json.JSONArray;
+=======
+import com.salabon.lazycards.CustomExceptions.AnkiServerDownException;
+import com.salabon.lazycards.CustomExceptions.WordException;
+
+>>>>>>> Stashed changes:app/src/main/java/com/salabon/lazycards/CardService.java
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,21 +40,15 @@ import static com.salabon.lazycards.DeckService.PERM_PRIVATE;
 public class UploadCardService extends IntentService {
 
     private static final String TAG = "uploadcardservice";
-    private static final String EXTRA_WORD =
-            "com.salabon.lazycards.word";
-    private static final String EXTRA_DECK =
-            "com.salabon.lazycards.deck";
+    // We will be sending the JSON body inside of intents
+    private final static String EXTRA_JSON_BODY =
+            "com.salabon.lazycards.JSON_BODY;";
     private static final String EXTRA_ACTION =
             "com.salabon.lazycards.action";
-    private static final String EXTRA_TAGS =
-            "com.salabon.lazycards.tags";
-    private static final String EXTRA_OPTIONS =
-            "com.salabon.lazycards.options";
-    private static final String EXTRA_API =
-            "com.salabon.lazycards.api";
 
     private static final int CREATE = 0; // create new card
 
+<<<<<<< Updated upstream:app/src/main/java/com/salabon/lazycards/UploadCardService.java
     /**
     * @param word : Word to retrieve definition of
     * @param deck : Deck to add card to
@@ -63,11 +63,13 @@ public class UploadCardService extends IntentService {
         Intent intent = new Intent(context, UploadCardService.class);
         intent.putExtra(EXTRA_WORD, word);
         intent.putExtra(EXTRA_DECK, deck);
+=======
+    static Intent newIntentCreate(Context context, JSONObject json){
+        Intent intent = new Intent(context, CardService.class);
+        String jsonStr = json.toString();
+        intent.putExtra(EXTRA_JSON_BODY, jsonStr);
+>>>>>>> Stashed changes:app/src/main/java/com/salabon/lazycards/CardService.java
         intent.putExtra(EXTRA_ACTION, CREATE);
-        intent.putExtra(EXTRA_TAGS, tags);
-        intent.putExtra(EXTRA_OPTIONS, options);
-        intent.putExtra(EXTRA_API, api);
-
         return intent;
     }
 
@@ -81,26 +83,23 @@ public class UploadCardService extends IntentService {
 
         int action = intent.getIntExtra(EXTRA_ACTION, -1);
 
-        JSONObject payload = null;
-
-        switch (action){
-            case CREATE:
-                payload = createJsonNewCard(intent);
-                break;
-            default:
-                // do nothing
+        JSONObject payload;
+        try {
+            payload = new JSONObject(intent.getStringExtra(EXTRA_JSON_BODY));
+        }catch (JSONException e){
+            payload = null;
         }
 
         if(payload != null){
             switch (action){
                 case CREATE:
-                    sendNewCard(payload);
-                    break;
+                    sendNewCard(payload); break;
                 default:
             }
         }
     }
 
+<<<<<<< Updated upstream:app/src/main/java/com/salabon/lazycards/UploadCardService.java
 
     // TODO test this one CASES: No mobile data, No Wifi, and vice versa
     private boolean isWifiConnected(){
@@ -144,6 +143,8 @@ public class UploadCardService extends IntentService {
         return payload;
     }
 
+=======
+>>>>>>> Stashed changes:app/src/main/java/com/salabon/lazycards/CardService.java
     private void sendNewCard(JSONObject payload){
         String strUrl = Anki.Endpoints.HTTP + DefaultPreferences.getIp(this)
                 + Anki.Endpoints.ADD_NOTE;
@@ -193,6 +194,7 @@ public class UploadCardService extends IntentService {
             finished(Anki.ActionResult.APACHE_UNREACHABLE);
         }
     }
+<<<<<<< Updated upstream:app/src/main/java/com/salabon/lazycards/UploadCardService.java
 
     // TODO Remove this bit of code duplication, also found in DeckService
     // Create an abstract class that extends IntentService?
@@ -212,4 +214,6 @@ public class UploadCardService extends IntentService {
         payload.put(jsonKey, arr);
     }
 
+=======
+>>>>>>> Stashed changes:app/src/main/java/com/salabon/lazycards/CardService.java
 }
