@@ -16,6 +16,10 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import NetworkScanner.NetworkScannerActivity;
@@ -114,6 +118,33 @@ public class MainFragment extends Fragment {
         getActivity().unregisterReceiver(mOnDeckServiceFinished);
     }
 
+    /**
+     * Here we are either setting the current deck or the user options
+     * @param requestCode : The request code currently comes from dialogs (DeckSelectDialog
+     *                    and WordOptionsDialog
+     * @param resultCode : Origin of param is same as above
+     * @param data : Origin of param is same as above
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode != Activity.RESULT_OK) return;
+
+        if(requestCode == REQUEST_DECK){
+            String selectedDeck = data.getStringExtra(DeckSelectDialog.EXTRA_SELECTED_DECK);
+            DefaultPreferences.setCurrentDeck(getActivity(), selectedDeck);
+            mCurrentDeckButton.setText(selectedDeck);
+        }
+        else if(requestCode == REQUEST_OPTIONS){
+            ArrayList<String> selectedOptions = data.getStringArrayListExtra(WordOptionsDialog.EXTRA_SELECTED_OPTIONS);
+            if(selectedOptions != null && !selectedOptions.isEmpty()){
+                mSelectedOptions = selectedOptions;
+            }
+            else{
+                setSelectedOptionsDefault();
+            }
+        }
+    }
+
     private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -142,23 +173,20 @@ public class MainFragment extends Fragment {
 
     // Before committing to a submit, we check the length first, then create the async
     private void submitWord(){
-        String editWord = mVocabWord.getText().toString().toLowerCase();
-        if (!editWord.isEmpty()){
-            String[] tags = splitAndCLeanTags();
-            String[] ops = mSelectedOptions.toArray(new String[0]);
-            String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
-
-            Intent i = CardService.newIntentCreateCard(getActivity(), editWord,
-                    currDeck, mCurrentApi, tags, ops);
-
-            getActivity().startService(i);
+        String word = mVocabWord.getText().toString().toLowerCase();
+        if(!word.isEmpty()){
+            JSONObject payload = createJsonBody(word);
+            if(payload != null) {
+                Intent i = CardService.newIntentCreate(getActivity(), payload);
+                getActivity().startService(i);
+            }
         }
-        else {
+        else{
             Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private String[] splitAndCLeanTags(){
+    private String[] splitAndCleanTags(){
         String tagStr = mTags.getText().toString();
         String[] tags = tagStr.split(" ");
 
@@ -169,11 +197,37 @@ public class MainFragment extends Fragment {
         return tags;
     }
 
-    // If the IP is not set, create a dialog asking user if they'd like to perform a netscan
-    private boolean isIpSet(){
-        return DefaultPreferences.getIp(getActivity()) != null;
+    private JSONObject createJsonBody(String word){
+        JSONObject payload = new JSONObject();
+        String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
+        String[] tags = splitAndCleanTags();
+        String[] options = mSelectedOptions.toArray(new String[0]);
+
+        try {
+            payload.put(Json_Keys.WORD, word);
+            payload.put(Json_Keys.DECK, currDeck);
+            payload.put(Json_Keys.API, mCurrentApi);
+
+            addArrayToPayload(payload, Json_Keys.TAGS, tags);
+            addArrayToPayload(payload, Json_Keys.OPTIONS, options);
+
+        } catch (JSONException e) {
+            return null;
+        }
+        return payload;
     }
-    
+
+    private void addArrayToPayload(JSONObject payload, String jsonKey, String[] args) throws JSONException {
+        if(args == null) return;
+
+        JSONArray arr = new JSONArray();
+        for(String s : args){
+            arr.put(s);
+        }
+        payload.put(jsonKey, arr);
+
+    }
+
     private Button createCurrentDeckButton(View view){
         Button currentDeckButton = view.findViewById(R.id.current_deck_text);
 
@@ -198,33 +252,6 @@ public class MainFragment extends Fragment {
         });
 
         return currentDeckButton;
-    }
-
-    /**
-     * Here we are either setting the current deck or the user options
-     * @param requestCode : The request code currently comes from dialogs (DeckSelectDialog
-     *                    and WordOptionsDialog
-     * @param resultCode : Origin of param is same as above
-     * @param data : Origin of param is same as above
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(resultCode != Activity.RESULT_OK) return;
-
-        if(requestCode == REQUEST_DECK){
-            String selectedDeck = data.getStringExtra(DeckSelectDialog.EXTRA_SELECTED_DECK);
-            DefaultPreferences.setCurrentDeck(getActivity(), selectedDeck);
-            mCurrentDeckButton.setText(selectedDeck);
-        }
-        else if(requestCode == REQUEST_OPTIONS){
-            ArrayList<String> selectedOptions = data.getStringArrayListExtra(WordOptionsDialog.EXTRA_SELECTED_OPTIONS);
-            if(selectedOptions != null && !selectedOptions.isEmpty()){
-                mSelectedOptions = selectedOptions;
-            }
-            else{
-                setSelectedOptionsDefault();
-            }
-        }
     }
 
     /**
