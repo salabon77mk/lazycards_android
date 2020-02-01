@@ -17,9 +17,12 @@ final class Anki {
         static final String ADD_NOTE = wsgiAlias + "/add_note";
     }
 
-    // This class represents the json response body
+    // This class represents the json response body from AnkiConnect
     final class JsonResults{
         static final String RESULT = "result";
+
+        static final String ERROR = "error";
+        static final String SUCCESS = "null"; // if nothing went wrong, "null" is part of the json response
     }
 
     final class ActionResult{
@@ -28,5 +31,8 @@ final class Anki {
         static final int APACHE_SERVER_DOWN = -1;
         static final int ANKI_SERVER_DOWN = -2;
         static final int APACHE_UNREACHABLE = -3;
+        static final int ANKI_CONNECT_ERROR = -4;
+
+        static final int API_ERROR = -5; // used if an API returned an error
     }
 }

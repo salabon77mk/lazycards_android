@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
         
-        <service android:name=".UploadCardService"/>
+        <service android:name=".CardService"/>
         <service android:name=".DeckService"/>
     </application>
 

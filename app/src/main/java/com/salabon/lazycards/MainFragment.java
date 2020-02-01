@@ -5,9 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,7 +70,6 @@ public class MainFragment extends Fragment {
         });
 
         mSubmitButton = v.findViewById(R.id.submit_word_button);
-        // TODO implement the async to submit to server
         mSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,7 +118,6 @@ public class MainFragment extends Fragment {
         getActivity().unregisterReceiver(mOnDeckServiceFinished);
     }
 
-
     /**
      * Here we are either setting the current deck or the user options
      * @param requestCode : The request code currently comes from dialogs (DeckSelectDialog
@@ -152,31 +148,31 @@ public class MainFragment extends Fragment {
     private BroadcastReceiver mOnDeckServiceFinished = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int status = intent.getIntExtra(DeckService.ACTION_STATUS, 0);
+            int status = intent.getIntExtra(ServerCommService.ACTION_STATUS, 0);
 
             if(status == Anki.ActionResult.SUCCESS){
-                Toast.makeText(getActivity(), getString(R.string.updated_deck_list), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.success), Toast.LENGTH_SHORT).show();
             }
-            else {
-                createErrorDialog(status);
+            else{
+                FragmentManager fragmentManager = getFragmentManager();
+                ServerErrorDialog dialog;
+                // These handle the custom messages received from either the currently selected API
+                // or AnkiConnect
+                if(status == Anki.ActionResult.ANKI_CONNECT_ERROR
+                        || status == Anki.ActionResult.API_ERROR){
+                    String body = intent.getStringExtra(ServerCommService.ERROR_BODY);
+                    dialog = ServerErrorDialog.newInstance(status, body);
+                }
+                else{
+                    dialog = ServerErrorDialog.newInstance(status);
+                }
+                dialog.show(fragmentManager, SERVER_ERROR_DIALOG);
             }
         }
     };
 
     // Before committing to a submit, we check the length first, then create the async
     private void submitWord(){
-<<<<<<< Updated upstream
-        String editWord = mVocabWord.getText().toString().toLowerCase();
-        if (!editWord.isEmpty()){
-            String[] tags = splitAndCLeanTags();
-            String[] ops = mSelectedOptions.toArray(new String[0]);
-            String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
-
-            Intent i = UploadCardService.newIntentCreateCard(getActivity(), editWord,
-                    currDeck, mCurrentApi, tags, ops);
-
-            getActivity().startService(i);
-=======
         String word = mVocabWord.getText().toString().toLowerCase();
         if(!word.isEmpty()){
             JSONObject payload = createJsonBody(word);
@@ -184,7 +180,6 @@ public class MainFragment extends Fragment {
                 Intent i = CardService.newIntentCreate(getActivity(), payload);
                 getActivity().startService(i);
             }
->>>>>>> Stashed changes
         }
         else{
             Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
@@ -230,15 +225,9 @@ public class MainFragment extends Fragment {
             arr.put(s);
         }
         payload.put(jsonKey, arr);
+
     }
 
-
-    private void createErrorDialog(int errorCode){
-        FragmentManager fragmentManager = getFragmentManager();
-        ServerErrorDialog errorDialog = ServerErrorDialog.newInstance(errorCode);
-        errorDialog.show(fragmentManager, SERVER_ERROR_DIALOG);
-    }
-    
     private Button createCurrentDeckButton(View view){
         Button currentDeckButton = view.findViewById(R.id.current_deck_text);
 
