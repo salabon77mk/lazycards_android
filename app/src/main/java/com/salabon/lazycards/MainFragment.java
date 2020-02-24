@@ -9,8 +9,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -21,10 +24,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import NetworkScanner.NetworkScannerActivity;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "MainFragment";
 
     private static final String DECK_DIALOG = "deck_select_dialog";
@@ -34,15 +38,19 @@ public class MainFragment extends Fragment {
     private static final int REQUEST_DECK = 0;
     private static final int REQUEST_OPTIONS = 1;
 
+    private final Card mCard = new Card(); // used to help fill out database
+
     private EditText mVocabWord;
+    private EditText mBackOfCard;
     private EditText mTags;
     private Button mCurrentDeckButton;
     private Button mGetDecksButton;
     private Button mOptionsButton;
+    private Spinner mApiSpinner;
     private Button mSubmitButton;
     private Button mTMPNetScanButton;
 
-    private ArrayList<String> mSelectedOptions = new ArrayList<>();
+    private List<String> mSelectedOptions = new ArrayList<>();
     private int mCurrentApi = Json_Keys.APIs.WORDS;
 
     @Override
@@ -56,6 +64,7 @@ public class MainFragment extends Fragment {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
 
         mVocabWord = v.findViewById(R.id.vocab_word_edit_text);
+        mBackOfCard = v.findViewById(R.id.back_of_card_note);
         mTags = v.findViewById(R.id.main_fragment_tags_edit_text);
 
         mCurrentDeckButton = createCurrentDeckButton(v);
@@ -66,14 +75,6 @@ public class MainFragment extends Fragment {
             public void onClick(View v) {
                 Intent i = DeckService.newIntentGetDecks(getActivity());
                 getActivity().startService(i);
-            }
-        });
-
-        mSubmitButton = v.findViewById(R.id.submit_word_button);
-        mSubmitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                submitWord();
             }
         });
 
@@ -88,6 +89,21 @@ public class MainFragment extends Fragment {
             }
         });
 
+        mSubmitButton = v.findViewById(R.id.submit_word_button);
+        mSubmitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                submitWord();
+            }
+        });
+
+
+        mApiSpinner = v.findViewById(R.id.api_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.apis, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mApiSpinner.setAdapter(adapter);
+        mApiSpinner.setOnItemSelectedListener(this);
 
         // TODO Delete once network scanner is fully implemented
         // Should be replaced with a dialog
@@ -177,6 +193,7 @@ public class MainFragment extends Fragment {
         if(!word.isEmpty()){
             JSONObject payload = createJsonBody(word);
             if(payload != null) {
+                setCardFields(); // save the current state of the card
                 Intent i = CardService.newIntentCreate(getActivity(), payload);
                 getActivity().startService(i);
             }
@@ -205,6 +222,7 @@ public class MainFragment extends Fragment {
 
         try {
             payload.put(Json_Keys.WORD, word);
+            payload.put(Json_Keys.BACK_CARD, mBackOfCard.getText().toString());
             payload.put(Json_Keys.DECK, currDeck);
             payload.put(Json_Keys.API, mCurrentApi);
 
@@ -262,5 +280,30 @@ public class MainFragment extends Fragment {
         if(mCurrentApi == Json_Keys.APIs.WORDS){
             mSelectedOptions.add(Words_API.DEFAULT);
         }
+    }
+
+    private void setCardFields(){
+        mCard.setVocabWord(mVocabWord.getText().toString());
+        mCard.setBackofCard(mBackOfCard.getText().toString());
+        mCard.setDeck(DefaultPreferences.getCurrentDeck(getActivity()));
+        mCard.setTags(mTags.getText().toString());
+        mCard.setApi(mCurrentApi);
+        mCard.setSelectedOptions(mSelectedOptions);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        mCurrentApi = position;
+        if(mCurrentApi == Json_Keys.APIs.NONE){
+            mOptionsButton.setEnabled(false);
+        }
+        else{
+            mOptionsButton.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

@@ -29,6 +29,7 @@ public class WordOptionsDialog extends DialogFragment {
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_API, api);
 
+
         WordOptionsDialog dialog = new WordOptionsDialog();
         dialog.setArguments(bundle);
         return dialog;

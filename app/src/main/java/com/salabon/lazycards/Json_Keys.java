@@ -6,14 +6,18 @@ package com.salabon.lazycards;
 */
 
 final class Json_Keys {
-    final static String WORD = "word";
-    final static String DECK = "deck";
-    final static String TAGS = "tags";
+    static final String WORD = "word";
+    static final String BACK_CARD = "back";
+    static final String DECK = "deck";
+    static final String TAGS = "tags";
  //   final static String ANKI_ACTION = "anki_action";
-    final static String OPTIONS = "options";
+    static final String OPTIONS = "options";
 
-    final static String API = "api";
+    static final String API = "api";
+
+    // NOTE: If you edit this, also edit the order of APIs:string.xml to reflect the order here
     final class APIs{
         static final int WORDS = 0;
+        static final int NONE = 1;
     }
 }
