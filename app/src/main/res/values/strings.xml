@@ -2,6 +2,10 @@
     <string name="app_name">LazyCards</string>
     <string name="success">Success!</string>
 
+    <!-- Nav Drawer -->
+    <string name="nav_home_fragment">Home</string>
+    <string name="nav_queued">Queued</string>
+    <string name="nav_network_scanner">Network Scanner</string>
 
     <!-- For MainFragment -->
     <string name="card_vocab_hint">Enter your vocab word</string>

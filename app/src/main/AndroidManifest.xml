@@ -23,9 +23,9 @@
         <!-- Remove android:usesCleartextTraffic if HTTPS is implemented -->
 
         <activity
-            android:name="NetworkScanner.NetworkScannerActivity"
+            android:name="com.salabon.lazycards.NetworkScanner.NetworkScannerActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".Cards.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,8 +33,8 @@
             </intent-filter>
         </activity>
         
-        <service android:name=".CardService"/>
-        <service android:name=".DeckService"/>
+        <service android:name=".Cards.Services.CardService"/>
+        <service android:name=".Cards.Services.DeckService"/>
     </application>
 
 </manifest>
