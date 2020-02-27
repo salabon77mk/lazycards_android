@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.salabon.lazycards.NetworkScanner.NetworkScannerActivity;
 import com.salabon.lazycards.R;
@@ -49,7 +50,7 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
     private static final int REQUEST_DECK = 0;
     private static final int REQUEST_OPTIONS = 1;
 
-    private final Card mCard = new Card(); // used to help fill out database
+    private final Card mCard = new Card(); // used to help fill out database TODO should it be final?
 
     private EditText mVocabWord;
     private EditText mBackOfCard;
@@ -299,7 +300,8 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
         mCard.setDeck(DefaultPreferences.getCurrentDeck(getActivity()));
         mCard.setTags(mTags.getText().toString());
         mCard.setApi(mCurrentApi);
-        mCard.setSelectedOptions(mSelectedOptions);
+        mCard.setSelectedOptionsFromList(mSelectedOptions);
+        mCard.setUUID(UUID.randomUUID());
     }
 
     @Override
