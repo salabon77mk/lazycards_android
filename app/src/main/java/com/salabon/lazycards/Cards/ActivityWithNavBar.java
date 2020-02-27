@@ -28,7 +28,7 @@ public abstract class ActivityWithNavBar
         super.onCreate(savedInstanceState);
 
         // init db
-        CardDbManager cardDb = CardDbManager.getInstance();
+        CardDbManager cardDb = CardDbManager.getInstance(this);
 
         setContentView(R.layout.drawer_layout);
 

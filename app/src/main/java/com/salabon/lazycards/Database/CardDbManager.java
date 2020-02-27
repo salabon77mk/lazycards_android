@@ -14,7 +14,7 @@ import java.util.UUID;
 
 
 public class CardDbManager {
-    private static CardDbManager sCardsDatabase;
+    private static CardDbManager sCardsDbManager;
     private Context mContext;
     private SQLiteDatabase mDatabase;
 
@@ -23,8 +23,11 @@ public class CardDbManager {
         mDatabase = new CardsHelper(mContext).getWritableDatabase();
     }
 
-    public static CardDbManager getInstance(){
-        return sCardsDatabase;
+    public static CardDbManager getInstance(Context context){
+        if(sCardsDbManager == null){
+            sCardsDbManager = new CardDbManager(context);
+        }
+        return sCardsDbManager;
     }
 
     public void addCard(Card card){
@@ -35,8 +38,16 @@ public class CardDbManager {
     public List<Card> getCards(){
         List<Card> cards = new ArrayList<>();
 
-        CardCursorWrapper cursor = queryQueuedCards(null, null); // gives whole table
+        //TEMPORARY CODE
+        String wordTemp = "WORD_";
+        String deckTemp = "DECK_";
+        for(int i = 0; i < 20; i++){
+            cards.add(newCard(wordTemp+ i, deckTemp + i));
+        }
 
+        /*
+        // TODO TEMPORARY COMMENT OUT
+        CardCursorWrapper cursor = queryQueuedCards(null, null); // gives whole table
         try{
             if(cursor.getCount() == 0){
                 return cards;
@@ -51,8 +62,17 @@ public class CardDbManager {
         finally {
             cursor.close();
         }
-
+        */
         return cards;
+    }
+
+    // TODO Debug method, delete later
+    private Card newCard(String vocab, String deck){
+        Card card = new Card();
+        card.setApi(0);
+        card.setVocabWord(vocab);
+        card.setDeck(deck);
+        return card;
     }
 
     public Card getCard(UUID id){

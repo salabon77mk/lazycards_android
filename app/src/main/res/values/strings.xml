@@ -33,6 +33,9 @@
     <!-- Host Model -->
     <string name="host_label">Host</string>
 
+    <!-- Queued Card Model -->
+    <string name="queued_api_set_text">API:  </string>
+    <string name="queued_deck_select">Deck:  </string>
 
     <!-- HostSelectDialog -->
     <string name="host_select_title">Host Selection</string>
