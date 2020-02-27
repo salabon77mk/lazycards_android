@@ -6,6 +6,8 @@
     <string name="nav_home_fragment">Home</string>
     <string name="nav_queued">Queued</string>
     <string name="nav_network_scanner">Network Scanner</string>
+    <string name="nav_open_drawer">Open navigation drawer</string>
+    <string name="nav_close_drawer">Close navigation drawer</string>
 
     <!-- For MainFragment -->
     <string name="card_vocab_hint">Enter your vocab word</string>

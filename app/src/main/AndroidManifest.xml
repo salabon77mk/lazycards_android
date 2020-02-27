@@ -24,8 +24,11 @@
 
         <activity
             android:name="com.salabon.lazycards.NetworkScanner.NetworkScannerActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden" />
-        <activity android:name=".Cards.MainActivity">
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:parentActivityName=".Cards.MainActivity"/>
+        <activity
+            android:name=".Cards.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
