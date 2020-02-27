@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.navigation.NavigationView;
+import com.salabon.lazycards.Database.CardDbManager;
 import com.salabon.lazycards.NetworkScanner.NetworkScannerActivity;
 import com.salabon.lazycards.R;
 
@@ -25,6 +26,10 @@ public abstract class ActivityWithNavBar
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
+        // init db
+        CardDbManager cardDb = CardDbManager.getInstance();
+
         setContentView(R.layout.drawer_layout);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
