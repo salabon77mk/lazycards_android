@@ -24,7 +24,6 @@ public class CardsHelper extends SQLiteOpenHelper {
         if(oldVersion < 1){
             db.execSQL("create table " + QueuedCardsTable.NAME + "(" +
                     " _id integer primary key autoincrement, " +
-                    QueuedCardsTable.Cols.UUID + "TEXT," +
                     QueuedCardsTable.Cols.VOCAB_WORD + "TEXT, " +
                     QueuedCardsTable.Cols.BACK_OF_CARD + "TEXT, " +
                     QueuedCardsTable.Cols.DECK + "TEXT, " +

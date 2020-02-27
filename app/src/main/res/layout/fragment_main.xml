@@ -85,12 +85,9 @@
         android:text="@string/submit_button"
         android:layout_margin="8dp"/>
 
-    <Button
-        android:id="@+id/TMP_network_scan_button"
+    <CheckBox
+        android:id="@+id/send_to_queue_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/TMP_network_scan"/>
-
-
-
+        android:text="@string/checkbox_send_to_queue" />
 </LinearLayout>

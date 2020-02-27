@@ -19,7 +19,7 @@ public class CardCursorWrapper extends CursorWrapper {
     }
 
     public Card getCard(){
-        String uuidString = getString(getColumnIndex(QueuedCardsTable.Cols.UUID));
+
         String vocabWord = getString(getColumnIndex(QueuedCardsTable.Cols.VOCAB_WORD));
         String backCard = getString(getColumnIndex(QueuedCardsTable.Cols.BACK_OF_CARD));
         String deck = getString(getColumnIndex(QueuedCardsTable.Cols.DECK));
@@ -27,7 +27,7 @@ public class CardCursorWrapper extends CursorWrapper {
         String options = getString(getColumnIndex(QueuedCardsTable.Cols.OPTIONS));
         int api = getInt(getColumnIndex(QueuedCardsTable.Cols.API));
 
-        Card card = new Card(UUID.fromString(uuidString));
+        Card card = new Card();
         card.setVocabWord(vocabWord);
         card.setBackofCard(backCard);
         card.setDeck(deck);

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -60,7 +61,8 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
     private Button mOptionsButton;
     private Spinner mApiSpinner;
     private Button mSubmitButton;
-    private Button mTMPNetScanButton;
+
+    private CheckBox mQueueCheckBox;
 
     private List<String> mSelectedOptions = new ArrayList<>();
     private int mCurrentApi = Json_Keys.APIs.WORDS;
@@ -117,16 +119,10 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
         mApiSpinner.setAdapter(adapter);
         mApiSpinner.setOnItemSelectedListener(this);
 
-        // TODO Delete once network scanner is fully implemented
-        // Should be replaced with a dialog
-        mTMPNetScanButton = v.findViewById(R.id.TMP_network_scan_button);
-        mTMPNetScanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = NetworkScannerActivity.newIntent(getActivity());
-                startActivity(intent);
-            }
-        });
+        mQueueCheckBox = v.findViewById(R.id.send_to_queue_checkbox);
+        if(mQueueCheckBox.isChecked()){
+            mQueueCheckBox.setChecked(false);
+        }
 
         setSelectedOptionsDefault();
 
@@ -203,6 +199,7 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
     private void submitWord(){
         String word = mVocabWord.getText().toString().toLowerCase();
         if(!word.isEmpty()){
+            //TODO check if checkbox is checked, if so send straight to queue
             JSONObject payload = createJsonBody(word);
             if(payload != null) {
                 setCardFields(); // save the current state of the card
@@ -301,7 +298,6 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
         mCard.setTags(mTags.getText().toString());
         mCard.setApi(mCurrentApi);
         mCard.setSelectedOptionsFromList(mSelectedOptions);
-        mCard.setUUID(UUID.randomUUID());
     }
 
     @Override

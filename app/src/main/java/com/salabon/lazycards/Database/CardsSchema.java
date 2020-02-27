@@ -5,7 +5,6 @@ public class CardsSchema {
         public static final String NAME = "queued_cards";
 
         public static final class Cols{
-            public static final String UUID = "uuid";
             public static final String VOCAB_WORD = "vocab_word";
             public static final String BACK_OF_CARD = "back_of_card";
             public static final String DECK = "deck";

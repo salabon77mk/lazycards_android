@@ -12,15 +12,6 @@ public class Card {
     private String mSelectedOptions;
 
     private int mApi; // the api used
-    private UUID mUUID;
-
-    public Card(){
-        this(UUID.randomUUID());
-    }
-
-    public Card(UUID id){
-        mUUID = id;
-    }
     
     public String getVocabWord() {
         return mVocabWord;
@@ -86,13 +77,5 @@ public class Card {
 
     public void setSelectedOptions(String options){
         mSelectedOptions = options;
-    }
-
-    public UUID getUUID() {
-        return mUUID;
-    }
-
-    public void setUUID(UUID UUID) {
-        mUUID = UUID;
     }
 }

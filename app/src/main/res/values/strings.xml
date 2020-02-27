@@ -19,7 +19,7 @@
     <string name="no_deck_selected">No Deck Selected</string>
     <string name="no_decks">There are no decks, press "Get Decks"</string>
     <string name="updated_deck_list">Updated Deck List</string>
-    <string name="TMP_network_scan">Net_Scan</string>
+    <string name="checkbox_send_to_queue">Send to queue instead</string>
     <string name="no_word_toast">Please enter a word for submission</string>
 
 

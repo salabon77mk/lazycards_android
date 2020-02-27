@@ -75,10 +75,13 @@ public class CardDbManager {
         return card;
     }
 
-    public Card getCard(UUID id){
+    // TODO should get Card by vocab word?
+    public Card getCard(String vocabWord, String deck){
+        String whereClause = QueuedCardsTable.Cols.VOCAB_WORD + " = ? AND " +
+                QueuedCardsTable.Cols.DECK + " = ?";
         CardCursorWrapper cursor = queryQueuedCards(
-                QueuedCardsTable.Cols.UUID + " = ?",
-                new String[] { id.toString() }
+                whereClause,
+                new String[] { vocabWord, deck }
         );
 
         try{
@@ -95,17 +98,19 @@ public class CardDbManager {
     }
 
     public void updateCard(Card card){
-        String idString = card.getUUID().toString();
+        String vocabWord = card.getVocabWord();
+        String deck = card.getDeck();
+        String whereClause = QueuedCardsTable.Cols.VOCAB_WORD + " = ? AND " +
+                QueuedCardsTable.Cols.DECK + " = ?";
         ContentValues values = getContentValues(card);
 
         mDatabase.update(QueuedCardsTable.NAME, values,
-                QueuedCardsTable.Cols.UUID + " = ?",
-                new String[] { idString });
+                whereClause,
+                new String[] { vocabWord, deck});
     }
 
     private static ContentValues getContentValues(Card card){
         ContentValues values = new ContentValues();
-        values.put(QueuedCardsTable.Cols.UUID, card.getUUID().toString());
         values.put(QueuedCardsTable.Cols.VOCAB_WORD, card.getVocabWord());
         values.put(QueuedCardsTable.Cols.BACK_OF_CARD , card.getBackofCard());
         values.put(QueuedCardsTable.Cols.DECK, card.getDeck());
