@@ -38,17 +38,19 @@ public class CardDbManager {
     public List<Card> getCards(){
         List<Card> cards = new ArrayList<>();
 
-        //TEMPORARY CODE
+        /*
         String wordTemp = "WORD_";
         String deckTemp = "DECK_";
-        for(int i = 0; i < 20; i++){
+        for(int i = 0; i < 10; i++){
             cards.add(newCard(wordTemp+ i, deckTemp + i));
         }
 
-        /*
+         */
+
         // TODO TEMPORARY COMMENT OUT
         CardCursorWrapper cursor = queryQueuedCards(null, null); // gives whole table
         try{
+            cursor.moveToFirst();
             if(cursor.getCount() == 0){
                 return cards;
             }
@@ -62,7 +64,7 @@ public class CardDbManager {
         finally {
             cursor.close();
         }
-        */
+
         return cards;
     }
 

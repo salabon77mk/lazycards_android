@@ -24,12 +24,12 @@ public class CardsHelper extends SQLiteOpenHelper {
         if(oldVersion < 1){
             db.execSQL("create table " + QueuedCardsTable.NAME + "(" +
                     " _id integer primary key autoincrement, " +
-                    QueuedCardsTable.Cols.VOCAB_WORD + "TEXT, " +
-                    QueuedCardsTable.Cols.BACK_OF_CARD + "TEXT, " +
-                    QueuedCardsTable.Cols.DECK + "TEXT, " +
-                    QueuedCardsTable.Cols.TAGS + "TEXT, " +
-                    QueuedCardsTable.Cols.OPTIONS + "TEXT, " +
-                    QueuedCardsTable.Cols.API+ "INTEGER" + ");" );
+                    QueuedCardsTable.Cols.VOCAB_WORD + " TEXT, " +
+                    QueuedCardsTable.Cols.BACK_OF_CARD + " TEXT, " +
+                    QueuedCardsTable.Cols.DECK + " TEXT, " +
+                    QueuedCardsTable.Cols.TAGS + " TEXT, " +
+                    QueuedCardsTable.Cols.OPTIONS + " TEXT, " +
+                    QueuedCardsTable.Cols.API+ " INTEGER" + ");" );
         }
         if(oldVersion < 2){
             // for future?

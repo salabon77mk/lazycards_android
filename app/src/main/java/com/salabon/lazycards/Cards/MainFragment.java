@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.salabon.lazycards.Database.CardDbManager;
 import com.salabon.lazycards.NetworkScanner.NetworkScannerActivity;
 import com.salabon.lazycards.R;
 
@@ -50,8 +51,6 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
 
     private static final int REQUEST_DECK = 0;
     private static final int REQUEST_OPTIONS = 1;
-
-    private final Card mCard = new Card(); // used to help fill out database TODO should it be final?
 
     private EditText mVocabWord;
     private EditText mBackOfCard;
@@ -198,14 +197,18 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
     // Before committing to a submit, we check the length first, then create the async
     private void submitWord(){
         String word = mVocabWord.getText().toString().toLowerCase();
-        if(!word.isEmpty()){
+        if(!word.isEmpty() && !mQueueCheckBox.isChecked()){
             //TODO check if checkbox is checked, if so send straight to queue
             JSONObject payload = createJsonBody(word);
-            if(payload != null) {
-                setCardFields(); // save the current state of the card
+            if(payload != null){
                 Intent i = CardService.newIntentCreate(getActivity(), payload);
                 getActivity().startService(i);
             }
+        }
+        else if(!word.isEmpty() && mQueueCheckBox.isChecked()){
+            Card card = createCard();
+            CardDbManager cardDbManager = CardDbManager.getInstance(getActivity());
+            cardDbManager.addCard(card);
         }
         else{
             Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
@@ -291,13 +294,16 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
         }
     }
 
-    private void setCardFields(){
-        mCard.setVocabWord(mVocabWord.getText().toString());
-        mCard.setBackofCard(mBackOfCard.getText().toString());
-        mCard.setDeck(DefaultPreferences.getCurrentDeck(getActivity()));
-        mCard.setTags(mTags.getText().toString());
-        mCard.setApi(mCurrentApi);
-        mCard.setSelectedOptionsFromList(mSelectedOptions);
+    private Card createCard(){
+        Card card = new Card();
+        card.setVocabWord(mVocabWord.getText().toString());
+        card.setBackofCard(mBackOfCard.getText().toString());
+        card.setDeck(DefaultPreferences.getCurrentDeck(getActivity()));
+        card.setTags(mTags.getText().toString());
+        card.setApi(mCurrentApi);
+        card.setSelectedOptionsFromList(mSelectedOptions);
+
+        return card;
     }
 
     @Override

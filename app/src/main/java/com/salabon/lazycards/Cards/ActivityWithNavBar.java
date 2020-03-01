@@ -23,6 +23,13 @@ public abstract class ActivityWithNavBar
         extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout mDrawer;
+    private NavigationView mNavigationView;
+
+    private enum Current_Fragment {
+        HOME, QUEUE
+    }
+
+    private Current_Fragment mCurrent_fragment;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -42,8 +49,8 @@ public abstract class ActivityWithNavBar
         mDrawer.addDrawerListener(toggle);
         toggle.syncState(); // must be called so that the icon is synchronized with state of drawer
 
-        NavigationView navigationView = findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView = findViewById(R.id.navigation_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
@@ -53,6 +60,7 @@ public abstract class ActivityWithNavBar
             fm.beginTransaction()
                     .add(R.id.fragment_container, fragment)
                     .commit();
+            mCurrent_fragment = Current_Fragment.HOME;
         }
     }
 
@@ -65,9 +73,11 @@ public abstract class ActivityWithNavBar
         switch (id){
             case R.id.nav_home_fragment:
                 fragment = new MainFragment();
+                mCurrent_fragment = Current_Fragment.HOME;
                 break;
             case R.id.nav_queued_cards:
                 fragment = new QueuedCardsFragment();
+                mCurrent_fragment = Current_Fragment.QUEUE;
                 break;
             case R.id.nav_network_scanner:
                 intent = NetworkScannerActivity.newIntent(this);
@@ -91,6 +101,19 @@ public abstract class ActivityWithNavBar
     public void onBackPressed(){
         if(mDrawer.isDrawerOpen(GravityCompat.START)){
             mDrawer.closeDrawer(GravityCompat.START);
+        }
+        else if(mCurrent_fragment == Current_Fragment.QUEUE){
+            Fragment fragment = new MainFragment();
+            mCurrent_fragment = Current_Fragment.HOME;
+
+            if(fragment != null){
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .commit();
+            }
+
+            mNavigationView.setCheckedItem(R.id.nav_home_fragment);
         }
         else{
             super.onBackPressed();

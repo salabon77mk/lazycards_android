@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.preference.PreferenceManager;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -53,7 +54,8 @@ public final class DefaultPreferences {
                 .apply();
     }
 
+    // The "Default" is the one deck that EVERY Anki user comes with
     public static String getCurrentDeck(Context context){
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_CURR_DECK, null);
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_CURR_DECK, "Default");
     }
 }
