@@ -10,8 +10,6 @@ import com.salabon.lazycards.Database.CardsSchema.QueuedCardsTable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 
 public class CardDbManager {
     private static CardDbManager sCardsDbManager;
@@ -58,16 +56,6 @@ public class CardDbManager {
         return cards;
     }
 
-    // TODO Debug method, delete later
-    private Card newCard(String vocab, String deck){
-        Card card = new Card();
-        card.setApi(0);
-        card.setVocabWord(vocab);
-        card.setDeck(deck);
-        return card;
-    }
-
-    // TODO should get Card by vocab word?
     public Card getCard(String vocabWord, String deck){
         String whereClause = QueuedCardsTable.Cols.VOCAB_WORD + " = ? AND " +
                 QueuedCardsTable.Cols.DECK + " = ?";
@@ -99,6 +87,18 @@ public class CardDbManager {
         mDatabase.update(QueuedCardsTable.NAME, values,
                 whereClause,
                 new String[] { vocabWord, deck});
+    }
+
+    public void deleteCard(Card card){
+        String vocabWord = card.getVocabWord();
+        String deck = card.getDeck();
+        String whereClause = QueuedCardsTable.Cols.VOCAB_WORD + " = ? AND " +
+                QueuedCardsTable.Cols.DECK + " = ?";
+        ContentValues values = getContentValues(card);
+
+        mDatabase.delete(QueuedCardsTable.NAME, whereClause,
+                new String[] { vocabWord, deck });
+
     }
 
     private static ContentValues getContentValues(Card card){

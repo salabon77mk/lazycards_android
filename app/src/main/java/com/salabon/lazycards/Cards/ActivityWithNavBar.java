@@ -41,6 +41,7 @@ public abstract class ActivityWithNavBar
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("AWDAWD");
 
         mDrawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawer, toolbar,
@@ -61,6 +62,7 @@ public abstract class ActivityWithNavBar
                     .add(R.id.fragment_container, fragment)
                     .commit();
             mCurrent_fragment = Current_Fragment.HOME;
+            getSupportActionBar().setTitle(R.string.home);
         }
     }
 
@@ -74,10 +76,12 @@ public abstract class ActivityWithNavBar
             case R.id.nav_home_fragment:
                 fragment = new MainFragment();
                 mCurrent_fragment = Current_Fragment.HOME;
+                getSupportActionBar().setTitle(R.string.home);
                 break;
             case R.id.nav_queued_cards:
                 fragment = new QueuedCardsFragment();
                 mCurrent_fragment = Current_Fragment.QUEUE;
+                getSupportActionBar().setTitle(R.string.queue);
                 break;
             case R.id.nav_network_scanner:
                 intent = NetworkScannerActivity.newIntent(this);

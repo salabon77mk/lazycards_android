@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+
 
 public class Card {
     private String mVocabWord;
