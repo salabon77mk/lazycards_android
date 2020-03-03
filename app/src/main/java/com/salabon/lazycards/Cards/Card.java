@@ -1,5 +1,11 @@
 package com.salabon.lazycards.Cards;
 
+import com.salabon.lazycards.Cards.Constants.Json_Keys;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
