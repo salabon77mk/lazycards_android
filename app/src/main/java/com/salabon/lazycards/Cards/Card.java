@@ -84,4 +84,44 @@ public class Card {
     public void setSelectedOptions(String options){
         mSelectedOptions = options;
     }
+
+    JSONObject toJson(){
+        JSONObject payload = new JSONObject();
+        String[] tags = splitAndCleanTags();
+        String[] options = getSelectedOptionsAsList().toArray(new String[0]);
+
+        try {
+            payload.put(Json_Keys.WORD, mVocabWord);
+            payload.put(Json_Keys.BACK_CARD, mBackofCard);
+            payload.put(Json_Keys.DECK, mDeck);
+            payload.put(Json_Keys.API, mApi);
+
+            addArrayToPayload(payload, Json_Keys.TAGS, tags);
+            addArrayToPayload(payload, Json_Keys.OPTIONS, options);
+
+        } catch (JSONException e) {
+            return null;
+        }
+        return payload;
+    }
+
+    private String[] splitAndCleanTags(){
+        String[] tags = mTags.split(" ");
+
+        for(int i = 0; i < tags.length; i++){
+            // Get rid of all non-alphabetic characters, should work with unicode
+            tags[i] = tags[i].replaceAll("[^\\p{L}]", "");
+        }
+        return tags;
+    }
+
+    private void addArrayToPayload(JSONObject payload, String jsonKey, String[] args) throws JSONException {
+        if(args == null) return;
+
+        JSONArray arr = new JSONArray();
+        for(String s : args){
+            arr.put(s);
+        }
+        payload.put(jsonKey, arr);
+    }
 }

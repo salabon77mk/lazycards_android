@@ -30,16 +30,12 @@ import com.salabon.lazycards.Cards.Services.CardService;
 import com.salabon.lazycards.Cards.Services.DeckService;
 import com.salabon.lazycards.Cards.Services.ServerCommService;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.salabon.lazycards.Database.CardDbManager;
-import com.salabon.lazycards.NetworkScanner.NetworkScannerActivity;
 import com.salabon.lazycards.R;
 
 public class MainFragment extends Fragment implements AdapterView.OnItemSelectedListener {
@@ -196,66 +192,22 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
 
     // Before committing to a submit, we check the length first, then create the async
     private void submitWord(){
-        String word = mVocabWord.getText().toString().toLowerCase();
-        if(!word.isEmpty() && !mQueueCheckBox.isChecked()){
+        Card card = createCard();
+        if(!card.getVocabWord().isEmpty() && !mQueueCheckBox.isChecked()){
             //TODO check if checkbox is checked, if so send straight to queue
-            JSONObject payload = createJsonBody(word);
+            JSONObject payload = card.toJson();
             if(payload != null){
                 Intent i = CardService.newIntentCreate(getActivity(), payload);
                 getActivity().startService(i);
             }
         }
-        else if(!word.isEmpty() && mQueueCheckBox.isChecked()){
-            Card card = createCard();
+        else if(!card.getVocabWord().isEmpty() && mQueueCheckBox.isChecked()){
             CardDbManager cardDbManager = CardDbManager.getInstance(getActivity());
             cardDbManager.addCard(card);
         }
         else{
             Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private String[] splitAndCleanTags(){
-        String tagStr = mTags.getText().toString();
-        String[] tags = tagStr.split(" ");
-
-        for(int i = 0; i < tags.length; i++){
-            // Get rid of all non-alphabetic characters, should work with unicode
-            tags[i] = tags[i].replaceAll("[^\\p{L}]", "");
-        }
-        return tags;
-    }
-
-    private JSONObject createJsonBody(String word){
-        JSONObject payload = new JSONObject();
-        String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
-        String[] tags = splitAndCleanTags();
-        String[] options = mSelectedOptions.toArray(new String[0]);
-
-        try {
-            payload.put(Json_Keys.WORD, word);
-            payload.put(Json_Keys.BACK_CARD, mBackOfCard.getText().toString());
-            payload.put(Json_Keys.DECK, currDeck);
-            payload.put(Json_Keys.API, mCurrentApi);
-
-            addArrayToPayload(payload, Json_Keys.TAGS, tags);
-            addArrayToPayload(payload, Json_Keys.OPTIONS, options);
-
-        } catch (JSONException e) {
-            return null;
-        }
-        return payload;
-    }
-
-    private void addArrayToPayload(JSONObject payload, String jsonKey, String[] args) throws JSONException {
-        if(args == null) return;
-
-        JSONArray arr = new JSONArray();
-        for(String s : args){
-            arr.put(s);
-        }
-        payload.put(jsonKey, arr);
-
     }
 
     private Button createCurrentDeckButton(View view){
