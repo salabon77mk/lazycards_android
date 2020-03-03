@@ -2,6 +2,11 @@
     <string name="app_name">LazyCards</string>
     <string name="success">Success!</string>
 
+    <!-- SupportActionToolBar Titles -->
+    <string name="home">Home</string>
+    <string name="queue">Queue</string>
+    <string name="network_scanner">Network Scanner</string>
+
     <!-- Nav Drawer -->
     <string name="nav_home_fragment">Home</string>
     <string name="nav_queued">Queued</string>
@@ -21,6 +26,9 @@
     <string name="updated_deck_list">Updated Deck List</string>
     <string name="checkbox_send_to_queue">Send to queue instead</string>
     <string name="no_word_toast">Please enter a word for submission</string>
+
+    <!-- QueuedCardFragment -->
+    <string name="submit_all_button">Submit All</string>
 
 
     <!-- For NetworkScannerActivity -->
@@ -42,7 +50,6 @@
     <string name="host_select_text">Set %1$s as your current host?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-
 
     <!-- DeckSelectDialog -->
     <string name="deck_select_dialog_title">Select your target deck</string>

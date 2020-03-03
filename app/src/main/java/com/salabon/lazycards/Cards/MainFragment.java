@@ -171,6 +171,7 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
 
             if(status == Anki.ActionResult.SUCCESS){
                 Toast.makeText(getActivity(), getString(R.string.success), Toast.LENGTH_SHORT).show();
+                clearFields();
             }
             else{
                 FragmentManager fragmentManager = getFragmentManager();
@@ -204,6 +205,7 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
         else if(!card.getVocabWord().isEmpty() && mQueueCheckBox.isChecked()){
             CardDbManager cardDbManager = CardDbManager.getInstance(getActivity());
             cardDbManager.addCard(card);
+            clearFields();
         }
         else{
             Toast.makeText(getActivity(), R.string.no_word_toast, Toast.LENGTH_SHORT).show();
@@ -214,9 +216,7 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
         Button currentDeckButton = view.findViewById(R.id.current_deck_text);
 
         String currDeck = DefaultPreferences.getCurrentDeck(getActivity());
-        if(currDeck != null){
-            currentDeckButton.setText(currDeck);
-        }
+        currentDeckButton.setText(currDeck);
 
         currentDeckButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -256,6 +256,12 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
         card.setSelectedOptionsFromList(mSelectedOptions);
 
         return card;
+    }
+
+    private void clearFields(){
+        mVocabWord.getText().clear();
+        mBackOfCard.getText().clear();
+        mTags.getText().clear();
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.salabon.lazycards.Cards;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -9,7 +10,10 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.salabon.lazycards.Cards.Services.CardService;
 import com.salabon.lazycards.Database.CardDbManager;
+
+import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -24,7 +28,6 @@ public class QueuedCardUploader extends HandlerThread {
     private static final int KILL_ME = 1;
 
     private boolean mHasQuit = false;
-    private Handler mResponseHandler;
     private Handler mRequestHandler;
 
     private Queue<Card> mCardQueue;
@@ -44,9 +47,8 @@ public class QueuedCardUploader extends HandlerThread {
         mListener = uploader;
     }
 
-    public QueuedCardUploader(Handler responseHandler, Context context){
+    public QueuedCardUploader(Context context){
         super(TAG);
-        mResponseHandler = responseHandler;
         mContext = context;
 
         CardDbManager db = CardDbManager.getInstance(context);
@@ -64,11 +66,9 @@ public class QueuedCardUploader extends HandlerThread {
             public void handleMessage(Message msg){
                 if(msg.what == UPLOAD){
                     if(!mCardQueue.isEmpty()) {
-                        Card card = (Card) msg.obj;
-                        handleRequest(card);
+                        handleRequest(mCardQueue.remove());
                     }
                 }
-
             }
         };
     }
@@ -76,21 +76,22 @@ public class QueuedCardUploader extends HandlerThread {
     @Override
     public boolean quit(){
         mHasQuit = true;
+        mCardQueue.clear();
         return super.quit();
     }
 
     private void handleRequest(final Card card){
         // convert card to json
+        JSONObject payload = card.toJson();
+        if(payload != null){
+            Intent i = CardService.newIntentCreate(mContext, payload);
+            mContext.startService(i);
+        }
 
     }
 
-    private void finished(){
-        mResponseHandler.post(() ->{
-            // TODO
-            // card delete
-            //mListener.onUploaded(0);
-        });
+    void submitCard(){
+        mRequestHandler.obtainMessage(UPLOAD).sendToTarget();
     }
 
-    //TODO register a listener
 }

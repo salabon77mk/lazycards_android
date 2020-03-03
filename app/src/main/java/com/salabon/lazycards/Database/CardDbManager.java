@@ -10,6 +10,7 @@ import com.salabon.lazycards.Database.CardsSchema.QueuedCardsTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.UUID;
 
 
@@ -99,6 +100,18 @@ public class CardDbManager {
         mDatabase.update(QueuedCardsTable.NAME, values,
                 whereClause,
                 new String[] { vocabWord, deck});
+    }
+
+    public void deleteCard(Card card){
+        String vocabWord = card.getVocabWord();
+        String deck = card.getDeck();
+        String whereClause = QueuedCardsTable.Cols.VOCAB_WORD + " = ? AND " +
+                QueuedCardsTable.Cols.DECK + " = ?";
+        ContentValues values = getContentValues(card);
+
+        mDatabase.delete(QueuedCardsTable.NAME, whereClause,
+                new String[] { vocabWord, deck });
+
     }
 
     private static ContentValues getContentValues(Card card){

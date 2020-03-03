@@ -67,6 +67,7 @@ implements HostSelectDialog.HostSelectDialogListener {
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        getSupportActionBar().setTitle(R.string.network_scanner);
         setContentView(R.layout.activity_network_scanner);
 
         if(savedInstanceState != null){
