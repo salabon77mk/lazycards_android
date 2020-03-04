@@ -17,8 +17,8 @@ what you'd like to include in your definition, and submit it away.
 Clone this repository and import it into Android Studio as a project. From there, connect your phone and hit run.
 The app is now installed.
 
-(Temporary) On the homescreen, press the NET\_SCAN button, and either select a device or input the
-IP address of the device that is hosting the LazyCards Server.
+Press the navigation icon at the top left, click Network Scanner, and either wait for the scan
+to complete and select a device or input the IP address and port of the LazyCards Server.
 
 ## APIs currently supported
 
@@ -28,9 +28,9 @@ IP address of the device that is hosting the LazyCards Server.
 ## DEMOS
 
 ### Submit Word Demo
-1. Input a word
+1. Input a word. The first text box is the front of the card. The second is your own note for the back.
 <br/><br/>
-![enter word](./demo_imgs/01_enter_word.jpg)
+![enter word](./demo_imgs/01_fill_out_word.jpg)
 <br/><br/>
 
 2. Select your deck
@@ -38,46 +38,92 @@ IP address of the device that is hosting the LazyCards Server.
 ![select deck](./demo_imgs/02_select_deck.jpg)
 <br/><br/>
 
-3. Choose the options you'd like to include as part of your flashcard
+3. Select the API you would like to use
 <br/><br/>
-![options](./demo_imgs/03_select_options.jpg)
-<br/><br/>
-
-4. Submit your word!
-<br/><br/>
-![submission success](./demo_imgs/04_submit_success.jpg)
+![select api](./demo_imgs/03_select_api.jpg)
 <br/><br/>
 
-5. Check out Anki. A new word!
+4. Choose the options you'd like to include as part of your flashcard
 <br/><br/>
-![new card](./demo_imgs/05_new_card.png)
+![options](./demo_imgs/04_select_word_options.jpg)
 <br/><br/>
 
-6. Here's the definition with the options you selected. Looks like the API couldn't find antonyms
+5. Submit your word! 
+<br/><br/>
+![submission success](./demo_imgs/05_success.jpg)
+<br/><br/>
+
+6. Check out Anki. A new word!
+<br/><br/>
+![new card](./demo_imgs/06_new_card.png)
+<br/><br/>
+
+7. Here's the definition with the options you selected. Looks like the API couldn't find antonyms
 for taste
 <br/><br/>
-![definition](./demo_imgs/06_card_definition.png)
+![definition](./demo_imgs/07_the_word_in_anki.png)
 <br/><br/>
 
 ---
 
+### Queue Demo, What happens when you're away from home and have a bunch of new cards to send?
+
+1. After filling out the details of your word, check "Send to queue instead" and hit "Submit"
+<br/><br/>
+![check queue](./demo_imgs/queue/01_send_words_to_queue.jpg)
+<br/><br/>
+
+2. After sending some cards to the queue, click on the navigation icon at the top left and select
+"Queued"
+<br/><br/>
+![nav](./demo_imgs/navigation.jpg)
+<br/><br/>
+
+3. A queue with some cards waiting to be sent to Anki
+<br/><br/>
+![check queue](./demo_imgs/queue/02_queue_with_cards.jpg)
+<br/><br/>
+
+4. Hit the submit button and watch the cards get sent away! The below image is once all cards 
+are sent.
+<br/><br/>
+![all send](./demo_imgs/queue/03_success_sent_all_cards.jpg)
+<br/><br/>
+
+5. Three new cards have appeared!
+<br/><br/>
+![many new cards](./demo_imgs/queue/04_many_new_cards_anki.png)
+<br/><br/>
+
+6. Here they are in Anki's card browser
+<br/><br/>
+![new cards in anki browse](./demo_imgs/queue/05_here_are_the_cards.png)
+<br/><br/>
+
+
+---
 ### Network Scanner Demo
-1. The scan just started!
+1. Navigate to the Network Scanner
+<br/><br/>
+![navigation](./demo_imgs/navigation.jpg)
+<br/><br/>
+
+2. The scan just started!
 <br/><br/>
 ![start scan](./demo_imgs/net_scan_demo/01_start_scan.jpg)
 <br/><br/>
 
-2. Getting some results
+3. Getting some results
 <br/><br/>
 ![partial results list](./demo_imgs/net_scan_demo/02_some_results.jpg)
 <br/><br/>
 
-3. Scan complete and results sorted via Key-Index sort
+4. Scan complete and results sorted via Key-Index sort
 <br/><br/>
 ![full results](./demo_imgs/net_scan_demo/03_scan_complete.jpg)
 <br/><br/>
 
-4. Select your host and your port optionally as well too!
+5. Select your host and your port optionally as well too!
 <br/><br/>
 ![host select](./demo_imgs/net_scan_demo/04_host_select.jpg)
 <br/><br/>

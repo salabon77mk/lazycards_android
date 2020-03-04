@@ -94,7 +94,6 @@ public class CardDbManager {
         String deck = card.getDeck();
         String whereClause = QueuedCardsTable.Cols.VOCAB_WORD + " = ? AND " +
                 QueuedCardsTable.Cols.DECK + " = ?";
-        ContentValues values = getContentValues(card);
 
         mDatabase.delete(QueuedCardsTable.NAME, whereClause,
                 new String[] { vocabWord, deck });
